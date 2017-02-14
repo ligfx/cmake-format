@@ -70,7 +70,6 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 %x STRING
 %x BRACKET
 %x BRACKETEND
-%x COMMENT
 
 MAKEVAR \$\([A-Za-z0-9_]*\)
 UNQUOTED ([^ \t\r\n\(\)#\\\"[=]|\\.)
@@ -78,7 +77,7 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
 
 %%
 
-<INITIAL,COMMENT>\n {
+<INITIAL>\n {
   lexer->token.type = cmListFileLexer_Token_Newline;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   ++lexer->line;
@@ -107,13 +106,11 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   BEGIN(BRACKET);
 }
 
-# {
+#[^\n]* {
+  lexer->token.type = cmListFileLexer_Token_Comment;
+  cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
-  BEGIN(COMMENT);
-}
-
-<COMMENT>.* {
-  lexer->column += yyleng;
+  return 1;
 }
 
 \( {
@@ -552,6 +549,8 @@ const char* cmListFileLexer_GetTypeAsString(cmListFileLexer* lexer,
       return "bracket argument";
     case cmListFileLexer_Token_CommentBracket:
       return "bracket comment";
+    case cmListFileLexer_Token_Comment:
+      return "comment";
     case cmListFileLexer_Token_BadCharacter:
       return "bad character";
     case cmListFileLexer_Token_BadBracket:
