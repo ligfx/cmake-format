@@ -5,6 +5,13 @@ set(CMAKE_CXX_STANDARD 11)
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
     add_compile_options(-fcolor-diagnostics)
 endif()
+if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    add_compile_options(/W4 /WX /EHsc
+        /wd4706  # assignment within conditional expression
+    )
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
+    add_compile_options(-Wall -Wextra -pedantic -Werror)
+endif()
 
 add_library(libcmakeformat OBJECT
     parser.cpp
@@ -14,7 +21,6 @@ add_executable(cmake-format
     cmake-format.cpp
     $<TARGET_OBJECTS:libcmakeformat>
 )
-target_compile_options(cmake-format PRIVATE -Wall -Wextra -pedantic -Werror)
 
 add_executable(cmake-format-tests EXCLUDE_FROM_ALL
     test_main.cpp
