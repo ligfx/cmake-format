@@ -13,7 +13,7 @@ matrix:
     - ./cmake-format -i CMakeLists.txt -indent-arguments="    " -indent-rparen="" -indent="    "
     - git --no-pager diff --exit-code
   - script:
-    - find . -not \( -path "./build" -prune -o -path "./3rdparty" -prune \) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
+    - find . -not \( -path "./3rdparty" -prune \) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
     - git --no-pager diff --exit-code
     compiler: none
     language: none

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(cmake-format LANGUAGES CXX)
+project(cmake-format)
 
 set(CMAKE_CXX_STANDARD 11)
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
@@ -15,7 +15,10 @@ endif()
 
 add_library(libcmakeformat OBJECT
     parser.cpp
+    cmListFileLexer.c
 )
+set_source_files_properties(cmListFileLexer.c PROPERTIES COMPILE_FLAGS -w)
+target_include_directories(libcmakeformat PRIVATE 3rdparty/cmake-3.7.2/Source)
 
 add_executable(cmake-format
     cmake-format.cpp
