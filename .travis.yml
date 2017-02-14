@@ -20,3 +20,5 @@ matrix:
 script:
   - cmake .
   - make all check
+  - ./cmake-format -i CMakeLists.txt -indent-arguments="    " -indent-rparen="" -indent="    "
+  - git --no-pager diff --exit-code
