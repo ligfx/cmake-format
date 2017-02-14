@@ -129,7 +129,6 @@ void CMakeParser::parse_rparen() {
 
 void CMakeParser::parse_dollar_sign_expression() {
 	expect(content[p] == '$', "dollar-sign");
-	size_t variable_reference_start = p;
 	p++;
 
 	char endbracket;
@@ -211,7 +210,6 @@ Span CMakeParser::parse_unquoted_argument() {
 		}
 
 		if (is_unquoted_element(content[p])) {
-			size_t unquoted_element_start = p;
 			while (is_unquoted_element(content[p])) {
 				p++;
 			}

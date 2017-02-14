@@ -14,7 +14,7 @@ add_executable(cmake-format
     cmake-format.cpp
     $<TARGET_OBJECTS:libcmakeformat>
 )
-target_compile_options(cmake-format PRIVATE -Wall -Wextra -pedantic -Werror -Wno-error=unused-variable)
+target_compile_options(cmake-format PRIVATE -Wall -Wextra -pedantic -Werror)
 
 add_executable(cmake-format-tests EXCLUDE_FROM_ALL
     test_main.cpp
