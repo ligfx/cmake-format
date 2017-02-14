@@ -15,9 +15,9 @@ endif()
 
 add_library(libcmakeformat OBJECT
     parser.cpp
-    cmListFileLexer.c
+    generated/cmListFileLexer.c
 )
-set_source_files_properties(cmListFileLexer.c PROPERTIES COMPILE_FLAGS -w)
+set_source_files_properties(generated/cmListFileLexer.c PROPERTIES COMPILE_FLAGS -w)
 target_include_directories(libcmakeformat PRIVATE 3rdparty/cmake-3.7.2/Source)
 
 add_executable(cmake-format

@@ -8,13 +8,13 @@ env:
 
 script:
 - lexer_source_commit=$(git --no-pager log -n 1 --pretty=format:%h -- 3rdparty/cmake-3.7.2/Source/cmListFileLexer.in.l)
-- lexer_generated_commit=$(git --no-pager log -n 1 --pretty=format:%h -- cmListFileLexer.c)
+- lexer_generated_commit=$(git --no-pager log -n 1 --pretty=format:%h -- generated/cmListFileLexer.c)
 - git merge-base --is-ancestor "${lexer_source_commit}" "${lexer_generated_commit}"
 - cmake .
 - cmake --build .
 - cmake --build . --target check
 - ./cmake-format -i CMakeLists.txt -indent-rparen="" -indent="    "
-- find . -not \( -path "./3rdparty" -prune \) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
+- find . -not \( -path "./3rdparty" -prune -o -path "./generated" -prune \) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
 - git --no-pager diff --exit-code
 
 addons:
