@@ -87,6 +87,11 @@ void CMakeParser::skip_ws() {
 }
 
 Command CMakeParser::parse_command_invocation() {
+	// HACK: Make sure command identifiers are always preceded by whitespace
+	if (spans.size() == 0 || spans.back().type != SpanType::Space) {
+		spans.emplace_back(SpanType::Space, "");
+	}
+
 	spans.push_back(parse_identifier());
 	const size_t identifier = spans.size() - 1;
 	skip_ws();
