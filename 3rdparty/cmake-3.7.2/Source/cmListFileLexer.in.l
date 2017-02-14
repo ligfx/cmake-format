@@ -495,7 +495,7 @@ int cmListFileLexer_SetString(cmListFileLexer* lexer, const char* text)
 /*--------------------------------------------------------------------------*/
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer* lexer)
 {
-  if (!lexer->file) {
+  if (!lexer->file && !lexer->string_buffer) {
     return 0;
   }
   if (cmListFileLexer_yylex(lexer->scanner, lexer)) {
