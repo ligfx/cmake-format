@@ -1,6 +1,7 @@
 WIP.
 
 [![TravisCI Build Status](https://travis-ci.org/ligfx/cmake-format.svg?branch=master)](https://travis-ci.org/ligfx/cmake-format)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/yjeg0k27l9lbyd3v?svg=true)](https://ci.appveyor.com/project/ligfx/cmake-format)
 
 ```
 $ ./cmake-format -help

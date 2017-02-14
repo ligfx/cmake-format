@@ -1,0 +1,10 @@
+shallow_clone: true
+build_script:
+- cmake .
+- cmake --build .
+test_script:
+- cmake --build . --target check
+
+before_build:
+# fix unrelated warnings: http://help.appveyor.com/discussions/problems/4569-the-target-_convertpdbfiles-
+- del "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
