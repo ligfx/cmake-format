@@ -10,7 +10,7 @@ matrix:
     script:
     - cmake .
     - make all check
-    - ./cmake-format -i CMakeLists.txt -indent-arguments="    " -indent-rparen="" -indent="    "
+    - ./cmake-format -i CMakeLists.txt -indent-rparen="" -indent="    "
     - git --no-pager diff --exit-code
   - script:
     - find . -not \( -path "./3rdparty" -prune \) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
