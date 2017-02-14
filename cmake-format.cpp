@@ -110,8 +110,8 @@ class FormatterIndent : public Formatter {
 
 			// Walk backwards to fix comments at the same prior indentation
 			// level.
-			size_t last_token_on_previous_line = c.identifier - 3;
-			while (true) {
+			ssize_t last_token_on_previous_line = c.identifier - 3;
+			while (last_token_on_previous_line >= 0) {
 				if (spans[last_token_on_previous_line].type == SpanType::Comment &&
 				    spans[last_token_on_previous_line - 1].type == SpanType::Space &&
 				    spans[last_token_on_previous_line - 2].type == SpanType::Newline) {
