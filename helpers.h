@@ -16,6 +16,11 @@ static inline void replace_all_in_string(std::string &main_string, const std::st
 	}
 }
 
+static inline void replace_invisibles_with_visibles(std::string &val) {
+	replace_all_in_string(val, " ", "·");
+	replace_all_in_string(val, "\t", "»   ");
+}
+
 static inline std::string lowerstring(const std::string &val) {
 	std::string newval = val;
 	std::transform(newval.begin(), newval.end(), newval.begin(),
