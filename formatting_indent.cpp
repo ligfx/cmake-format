@@ -59,7 +59,7 @@ void FormatterIndent::run(const std::vector<Command> &commands, std::vector<Span
 					     spans[next_token + 1].data.substr(old_indentation.size()));
 				}
 				next_token++;
-			} else if (spans[next_token].type == SpanType::Lparen) {
+			} else if (spans[next_token].type == SpanType::Rparen) {
 				break;
 			} else {
 				next_token++;
