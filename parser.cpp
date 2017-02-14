@@ -186,7 +186,8 @@ Span CMakeParser::parse_unquoted_argument() {
 	size_t parens_level = 0;
 	while (true) {
 		if (content[p] == '\\') {
-			throw parseexception("escape sequences unimplemented");
+			p += 2;
+			continue;
 		}
 		if (content[p] == '$') {
 			parse_dollar_sign_expression();
