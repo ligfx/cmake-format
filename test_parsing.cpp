@@ -36,13 +36,9 @@ simple_cmake_command(
 )");
 }
 
-#ifndef _MSC_VER
-// HACK: this doesn't work on Windows
-// TODO: what exception has message "basic_string"?
 TEST_CASE("Doesn't hang on unbalanced parentheses", "[parsing]") {
 	REQUIRE_THROWS(parse(R"(command()"));
 }
-#endif
 
 TEST_CASE("Parses bare parentheses in arguments", "[parsing]") {
 	(void)parse(R"(simple_cmake_command(()))");
