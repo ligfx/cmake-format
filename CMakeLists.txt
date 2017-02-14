@@ -14,6 +14,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 endif()
 
 add_library(libcmakeformat OBJECT
+    formatting_indent.cpp
     parser.cpp
     generated/cmListFileLexer.c
 )
