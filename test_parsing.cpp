@@ -38,9 +38,5 @@ simple_cmake_command(
 }
 
 TEST_CASE("Doesn't hang on unbalanced parentheses", "[parsing]") {
-	std::ignore = parse(R"(
-
-	command(
-
-	)");
+	REQUIRE_THROWS(parse(R"(command()"));
 }

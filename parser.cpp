@@ -204,6 +204,9 @@ Span CMakeParser::parse_unquoted_argument() {
 		}
 		break;
 	}
+	if (unquoted_argument_start == p) {
+		throw parseexception("expected unquoted argument");
+	}
 	return {SpanType::Unquoted,
 	        content.substr(unquoted_argument_start, p - unquoted_argument_start)};
 }
