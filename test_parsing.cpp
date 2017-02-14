@@ -7,7 +7,7 @@
 #include "parser.h"
 
 TEST_CASE("Parses CMake code", "[parsing]") {
-	std::ignore = parse(R"(
+	(void)parse(R"(
 
 cmake_command_without_arguments()
 _underscore_cmake_command()
@@ -41,5 +41,5 @@ TEST_CASE("Doesn't hang on unbalanced parentheses", "[parsing]") {
 }
 
 TEST_CASE("Parses bare parentheses in arguments", "[parsing]") {
-	std::ignore = parse(R"(simple_cmake_command(()))");
+	(void)parse(R"(simple_cmake_command(()))");
 }
