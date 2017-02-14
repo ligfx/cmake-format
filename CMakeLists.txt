@@ -28,6 +28,7 @@ add_executable(cmake-format
 
 add_executable(cmake-format-tests EXCLUDE_FROM_ALL
     test_main.cpp
+    test_formatting_indent.cpp
     test_parsing.cpp
     $<TARGET_OBJECTS:libcmakeformat>
 )
