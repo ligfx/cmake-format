@@ -6,5 +6,4 @@ AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakBeforeMultilineStrings: true
-BreakBeforeBinaryOperators: All
 ColumnLimit: 100

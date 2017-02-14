@@ -44,8 +44,7 @@ class Formatter {
 	virtual ~Formatter() = default;
 	virtual std::vector<std::pair<std::string, std::string>> describeCommandLine() = 0;
 	virtual bool handleCommandLine(const std::string &arg,
-	                               std::vector<FormatterFunction> &formatter_functions)
-	    = 0;
+	                               std::vector<FormatterFunction> &formatter_functions) = 0;
 };
 
 class FormatterIndent : public Formatter {
@@ -72,8 +71,8 @@ class FormatterIndent : public Formatter {
 		for (auto c : commands) {
 			const std::string ident = lowerstring(spans[c.identifier].data);
 
-			if (ident == "endif" || ident == "endforeach" || ident == "endwhile"
-			    || ident == "endmacro" || ident == "endfunction") {
+			if (ident == "endif" || ident == "endforeach" || ident == "endwhile" ||
+			    ident == "endmacro" || ident == "endfunction") {
 				global_indentation_level--;
 			}
 
@@ -94,9 +93,9 @@ class FormatterIndent : public Formatter {
 					size_t old_indentation_pos = spans[next_token + 1].data.find(old_indentation);
 					if (old_indentation_pos != 0) {
 					} else {
-						spans[next_token + 1].data
-						    = (repeat_string(indent_string, indentation_level)
-						       + spans[next_token + 1].data.substr(old_indentation.size()));
+						spans[next_token + 1].data =
+						    (repeat_string(indent_string, indentation_level) +
+						     spans[next_token + 1].data.substr(old_indentation.size()));
 					}
 					next_token++;
 				} else if (spans[next_token].type == SpanType::Lparen) {
@@ -110,14 +109,14 @@ class FormatterIndent : public Formatter {
 			// level.
 			size_t last_token_on_previous_line = c.identifier - 3;
 			while (true) {
-				if (spans[last_token_on_previous_line].type == SpanType::Comment
-				    && spans[last_token_on_previous_line - 1].type == SpanType::Space
-				    && spans[last_token_on_previous_line - 2].type == SpanType::Newline) {
-					spans[last_token_on_previous_line - 1].data
-					    = repeat_string(indent_string, indentation_level);
+				if (spans[last_token_on_previous_line].type == SpanType::Comment &&
+				    spans[last_token_on_previous_line - 1].type == SpanType::Space &&
+				    spans[last_token_on_previous_line - 2].type == SpanType::Newline) {
+					spans[last_token_on_previous_line - 1].data =
+					    repeat_string(indent_string, indentation_level);
 					last_token_on_previous_line -= 3;
-				} else if (spans[last_token_on_previous_line].type == SpanType::Space
-				           && spans[last_token_on_previous_line - 1].type == SpanType::Newline) {
+				} else if (spans[last_token_on_previous_line].type == SpanType::Space &&
+				           spans[last_token_on_previous_line - 1].type == SpanType::Newline) {
 					last_token_on_previous_line -= 2;
 				} else if (spans[last_token_on_previous_line].type == SpanType::Newline) {
 					last_token_on_previous_line -= 1;
@@ -126,8 +125,8 @@ class FormatterIndent : public Formatter {
 				}
 			}
 
-			if (ident == "if" || ident == "foreach" || ident == "while" || ident == "macro"
-			    || ident == "function") {
+			if (ident == "if" || ident == "foreach" || ident == "while" || ident == "macro" ||
+			    ident == "function") {
 				global_indentation_level++;
 			}
 		}
@@ -151,8 +150,8 @@ class FormatterIndentArgument : public Formatter {
 			return true;
 		}
 		if (arg.find("-indent-arguments=") == 0) {
-			std::string argument_indent_string
-			    = arg.substr(std::string{"-indent-arguments="}.size());
+			std::string argument_indent_string =
+			    arg.substr(std::string{"-indent-arguments="}.size());
 			replace_all_in_string(argument_indent_string, "\\t", "\t");
 			formatter_functions.emplace_back(std::bind(run, _1, _2, false, argument_indent_string));
 			return true;

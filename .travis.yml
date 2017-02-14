@@ -1,9 +1,22 @@
 language: cpp
+compiler:
+- clang
+- gcc
 dist: trusty
 sudo: false
-compiler:
-  - clang
-  - gcc
+
+matrix:
+  include:
+  - script:
+      - find . -not \( -path "./build" -prune \) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
+      - git --no-pager diff --exit-code
+    compiler: none
+    language: none
+    addons:
+      apt:
+        packages:
+        - clang-format-3.8
+
 script:
   - mkdir build
   - cd build

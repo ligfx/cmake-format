@@ -33,8 +33,8 @@ static bool isIdentifier(char c) {
 
 void CMakeParser::expect(bool condition, const std::string &description) {
 	if (!condition) {
-		throw parseexception("FAILURE: Expected " + description + " at " + std::to_string(p)
-		                     + ", got:\n" + content.substr(p, p + 50));
+		throw parseexception("FAILURE: Expected " + description + " at " + std::to_string(p) +
+		                     ", got:\n" + content.substr(p, p + 50));
 	}
 }
 
