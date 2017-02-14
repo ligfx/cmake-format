@@ -8,6 +8,9 @@ matrix:
     env:
     - CXXFLAGS=-fsanitize=address
     script:
+    - lexer_source_commit=$(git --no-pager log -n 1 --pretty=format:%h -- 3rdparty/cmake-3.7.2/Source/cmListFileLexer.in.l)
+    - lexer_generated_commit=$(git --no-pager log -n 1 --pretty=format:%h -- cmListFileLexer.c)
+    - git merge-base --is-ancestor "${lexer_source_commit}" "${lexer_generated_commit}"
     - cmake .
     - make all check
     - ./cmake-format -i CMakeLists.txt -indent-rparen="" -indent="    "
