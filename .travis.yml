@@ -1,24 +1,23 @@
 language: cpp
-compiler:
-- clang
-- gcc
 dist: trusty
 sudo: false
 
 matrix:
   include:
+  - compiler: clang
+    env:
+    - CXXFLAGS=-fsanitize=address
+    script:
+    - cmake .
+    - make all check
+    - ./cmake-format -i CMakeLists.txt -indent-arguments="    " -indent-rparen="" -indent="    "
+    - git --no-pager diff --exit-code
   - script:
-      - find . -not \( -path "./build" -prune \) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
-      - git --no-pager diff --exit-code
+    - find . -not \( -path "./build" -prune \) -name '*.cpp' -o -name '*.h' | xargs clang-format -i
+    - git --no-pager diff --exit-code
     compiler: none
     language: none
     addons:
       apt:
         packages:
         - clang-format-3.8
-
-script:
-  - cmake .
-  - make all check
-  - ./cmake-format -i CMakeLists.txt -indent-arguments="    " -indent-rparen="" -indent="    "
-  - git --no-pager diff --exit-code
