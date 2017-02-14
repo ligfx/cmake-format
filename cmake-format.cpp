@@ -10,30 +10,9 @@
 #include <utility>
 #include <vector>
 
+#include "parser.h"
+
 using namespace std::placeholders;
-
-static std::string content;
-static size_t p = 0;
-
-enum class SpanType {
-	Identifier,
-	Quoted,
-	Unquoted,
-	Newline,
-	Comment,
-	Space,
-	Lparen,
-	Rparen,
-};
-
-struct Span {
-	Span(const SpanType &type_, const std::string &data_) : type(type_), data(data_) {
-	}
-	SpanType type;
-	std::string data;
-};
-
-static std::vector<Span> spans;
 
 void replace_all_in_string(std::string &main_string, const std::string &from,
                            const std::string &to) {
@@ -41,197 +20,6 @@ void replace_all_in_string(std::string &main_string, const std::string &from,
 	while ((pos = main_string.find(from, pos)) != std::string::npos) {
 		main_string.replace(pos, from.size(), to);
 	}
-}
-
-struct Command {
-	Command(size_t identifer_, std::vector<size_t> arguments_)
-	    : identifier(identifer_), arguments(arguments_) {
-	}
-	const size_t identifier;
-	const std::vector<size_t> arguments;
-};
-
-bool isIdentifierStart(char c) {
-	return std::isalpha(c) || c == '_';
-}
-
-bool isIdentifier(char c) {
-	return std::isalnum(c) || c == '_';
-}
-
-void skip_ws() {
-	while (true) {
-		if (content[p] == '\n') {
-			spans.emplace_back(SpanType::Newline, content.substr(p, 1));
-			p++;
-			if (!std::isspace(content[p])) {
-				// HACK: Make sure newlines are always followed by whitespace, this makes
-				// transformations easier.
-				spans.emplace_back(SpanType::Space, "");
-			}
-			continue;
-		}
-		if (std::isspace(content[p])) {
-			size_t space_start = p;
-			while (std::isspace(content[p]) && content[p] != '\n') {
-				p++;
-			}
-			spans.emplace_back(SpanType::Space, content.substr(space_start, p - space_start));
-			continue;
-		}
-		if (content[p] == '#') {
-			size_t comment_start = p;
-			while (content[p] != '\n') {
-				p++;
-			}
-			spans.emplace_back(SpanType::Comment, content.substr(comment_start, p - comment_start));
-			continue;
-		}
-		break;
-	}
-}
-
-void expect(bool condition, const std::string &description) {
-	if (!condition) {
-		printf("FAILURE: Expected %s at %zu, got:\n%s\n", description.c_str(), p,
-		       content.substr(p, p + 50).c_str());
-		exit(1);
-	}
-}
-
-Span parse_identifier() {
-	expect(isIdentifierStart(content[p]), "identifier start");
-	size_t ident_start = p;
-	p++;
-	while (isIdentifier(content[p])) {
-		p++;
-	}
-	return {SpanType::Identifier, content.substr(ident_start, p - ident_start)};
-}
-
-void parse_lparen() {
-	expect(content[p] == '(', "left paren");
-	spans.emplace_back(SpanType::Lparen, content.substr(p, 1));
-	p++;
-}
-
-void parse_rparen() {
-	expect(content[p] == ')', "right paren");
-	if (spans.back().type != SpanType::Space) {
-		// HACK: Make sure right-parens are always preceded by whitespace, this makes
-		// transformations easier.
-		spans.emplace_back(SpanType::Space, "");
-	}
-	spans.emplace_back(SpanType::Rparen, content.substr(p, 1));
-	p++;
-}
-
-void parse_dollar_sign_expression() {
-	expect(content[p] == '$', "dollar-sign");
-	size_t variable_reference_start = p;
-	p++;
-
-	char endbracket;
-	if (content[p] == '{') {
-		p++;
-		endbracket = '}';
-	} else if (content[p] == '(') {
-		p++;
-		endbracket = ')';
-	} else if (content[p] == '<') {
-		p++;
-		endbracket = '>';
-	} else {
-		expect(false, "'{', '(', or '<'");
-	}
-
-	while (true) {
-		// HACK: this is more lenient than the real CMake parser
-		if (content[p] == '$') {
-			parse_dollar_sign_expression();
-			continue;
-		} else if (content[p] == endbracket) {
-			p++;
-			break;
-		}
-		p++;
-	}
-}
-
-Span parse_quoted_argument() {
-	expect(content[p] == '"', "double-quote");
-	size_t quoted_argument_start = p;
-	p++;
-	while (true) {
-		if (content[p] == '\\') {
-			p++;
-			p++;
-		} else if (content[p] == '"') {
-			p++;
-			break;
-		} else {
-			p++;
-		}
-	}
-	return {SpanType::Quoted, content.substr(quoted_argument_start, p - quoted_argument_start)};
-}
-
-bool is_unquoted_element(const char c) {
-	// TODO: instead of std::isspace, also need to skip anything CMake thinks is
-	// whitespace (like comments)
-	return !(std::isspace(c) || c == '\\' || c == '$' || c == '"' || c == '(' || c == ')');
-}
-
-Span parse_unquoted_argument() {
-	size_t unquoted_argument_start = p;
-	while (true) {
-		if (content[p] == '\\') {
-			fprintf(stderr, "escape sequences unimplemented\n");
-			exit(1);
-		}
-		if (content[p] == '$') {
-			parse_dollar_sign_expression();
-			continue;
-		}
-		if (content[p] == '"') {
-			parse_quoted_argument();
-			continue;
-		}
-		if (is_unquoted_element(content[p])) {
-			size_t unquoted_element_start = p;
-			while (is_unquoted_element(content[p])) {
-				p++;
-			}
-			continue;
-		}
-		break;
-	}
-	return {SpanType::Unquoted,
-	        content.substr(unquoted_argument_start, p - unquoted_argument_start)};
-}
-
-Command parse_command_invocation() {
-	spans.push_back(parse_identifier());
-	const size_t identifier = spans.size() - 1;
-	skip_ws();
-	parse_lparen();
-	skip_ws();
-	std::vector<size_t> arguments;
-	while (true) {
-		if (content[p] == ')') {
-			parse_rparen();
-			break;
-		} else if (content[p] == '"') {
-			spans.push_back(parse_quoted_argument());
-			arguments.push_back(spans.size() - 1);
-		} else {
-			spans.push_back(parse_unquoted_argument());
-			arguments.push_back(spans.size() - 1);
-		}
-		skip_ws();
-	}
-
-	return {identifier, arguments};
 }
 
 std::string lowerstring(const std::string &val) {
@@ -556,19 +344,15 @@ int main(int argc, char **argv) {
 	}
 
 	for (auto filename : filenames) {
+		std::string content;
 		{
 			std::ifstream file{filename};
 			content = {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
 		}
 
+		std::vector<Span> spans;
 		std::vector<Command> commands;
-		while (true) {
-			skip_ws();
-			if (p >= content.size()) {
-				break;
-			}
-			commands.push_back(parse_command_invocation());
-		}
+		std::tie(spans, commands) = parse(content);
 
 		for (auto f : formatting_functions) {
 			f(commands, spans);
