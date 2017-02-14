@@ -2,6 +2,8 @@
    file Copyright.txt or https://opensource.org/licenses/BSD-3-Clause for
    details.  */
 
+#include <cctype>
+
 #include "parser.h"
 
 struct CMakeParser {
