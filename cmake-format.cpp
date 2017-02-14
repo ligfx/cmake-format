@@ -2,9 +2,12 @@
    file Copyright.txt or https://opensource.org/licenses/BSD-3-Clause for
    details.  */
 
-#include <cassert>
+#include <algorithm>
+#include <cctype>
 #include <fstream>
+#include <functional>
 #include <iostream>
+#include <memory>
 #include <regex>
 #include <string>
 #include <utility>
