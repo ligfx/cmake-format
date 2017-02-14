@@ -2,8 +2,6 @@
    file Copyright.txt or https://opensource.org/licenses/BSD-3-Clause for
    details.  */
 
-#include <cstdlib>
-
 #include "parser.h"
 
 struct CMakeParser {
@@ -35,9 +33,8 @@ static bool isIdentifier(char c) {
 
 void CMakeParser::expect(bool condition, const std::string &description) {
 	if (!condition) {
-		printf("FAILURE: Expected %s at %zu, got:\n%s\n", description.c_str(), p,
-		       content.substr(p, p + 50).c_str());
-		exit(1);
+		throw parseexception("FAILURE: Expected " + description + " at " + std::to_string(p)
+		                     + ", got:\n" + content.substr(p, p + 50));
 	}
 }
 
@@ -188,8 +185,7 @@ Span CMakeParser::parse_unquoted_argument() {
 	size_t unquoted_argument_start = p;
 	while (true) {
 		if (content[p] == '\\') {
-			fprintf(stderr, "escape sequences unimplemented\n");
-			exit(1);
+			throw parseexception("escape sequences unimplemented");
 		}
 		if (content[p] == '$') {
 			parse_dollar_sign_expression();
@@ -210,6 +206,9 @@ Span CMakeParser::parse_unquoted_argument() {
 	}
 	return {SpanType::Unquoted,
 	        content.substr(unquoted_argument_start, p - unquoted_argument_start)};
+}
+
+parseexception::parseexception(const std::string &message) : std::runtime_error{message} {
 }
 
 std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &content) {

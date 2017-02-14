@@ -33,4 +33,8 @@ struct Command {
 	const std::vector<size_t> arguments;
 };
 
+struct parseexception : public std::runtime_error {
+	explicit parseexception(const std::string &message);
+};
+
 std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &content);
