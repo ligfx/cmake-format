@@ -183,6 +183,7 @@ static bool is_unquoted_element(const char c) {
 
 Span CMakeParser::parse_unquoted_argument() {
 	size_t unquoted_argument_start = p;
+	size_t parens_level = 0;
 	while (true) {
 		if (content[p] == '\\') {
 			throw parseexception("escape sequences unimplemented");
@@ -195,6 +196,17 @@ Span CMakeParser::parse_unquoted_argument() {
 			parse_quoted_argument();
 			continue;
 		}
+		if (content[p] == '(') {
+			parens_level++;
+			p++;
+			continue;
+		}
+		if (content[p] == ')' && parens_level > 0) {
+			parens_level--;
+			p++;
+			continue;
+		}
+
 		if (is_unquoted_element(content[p])) {
 			size_t unquoted_element_start = p;
 			while (is_unquoted_element(content[p])) {

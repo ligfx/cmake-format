@@ -14,7 +14,6 @@ _underscore_cmake_command()
 UPPERCASE_CMAKE_COMMAND()
 c3e_c5d_w2h_n5s()
 simple_cmake_command(
-	()
 	simple_argument
 	UPPERCASE_ARGUMENT
 	_argument_starting_with_underscore
@@ -39,4 +38,8 @@ simple_cmake_command(
 
 TEST_CASE("Doesn't hang on unbalanced parentheses", "[parsing]") {
 	REQUIRE_THROWS(parse(R"(command()"));
+}
+
+TEST_CASE("Parses bare parentheses in arguments", "[parsing]") {
+	std::ignore = parse(R"(simple_cmake_command(()))");
 }
