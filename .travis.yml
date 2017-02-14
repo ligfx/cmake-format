@@ -18,7 +18,5 @@ matrix:
         - clang-format-3.8
 
 script:
-  - mkdir build
-  - cd build
-  - cmake ..
-  - make
+  - cmake .
+  - make all check
