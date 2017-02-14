@@ -131,7 +131,7 @@ void CMakeParser::parse_dollar_sign_expression() {
 	expect(content[p] == '$', "dollar-sign");
 	p++;
 
-	char endbracket;
+	char endbracket = 0;
 	if (content[p] == '{') {
 		p++;
 		endbracket = '}';
