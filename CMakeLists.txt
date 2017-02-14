@@ -18,6 +18,7 @@ target_compile_options(cmake-format PRIVATE -Wall -Wextra -pedantic -Werror -Wno
 
 add_executable(cmake-format-tests EXCLUDE_FROM_ALL
     test_main.cpp
+    test_parsing.cpp
     $<TARGET_OBJECTS:libcmakeformat>
 )
 target_include_directories(cmake-format-tests PRIVATE 3rdparty/catch-1.7.2)
