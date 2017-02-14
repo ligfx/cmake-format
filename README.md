@@ -1,5 +1,7 @@
 WIP.
 
+[![TravisCI Build Status](https://travis-ci.org/ligfx/cmake-format.svg?branch=master)](https://travis-ci.org/ligfx/cmake-format)
+
 ```
 $ ./cmake-format -help
 usage: ./cmake-format [options] [file ...]
