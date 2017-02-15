@@ -21,6 +21,7 @@ endif()
 
 add_library(libcmakeformat OBJECT
     transform_indent.cpp
+    transform_lowercase_commands.cpp
     parser.cpp
     generated/cmListFileLexer.c
 )

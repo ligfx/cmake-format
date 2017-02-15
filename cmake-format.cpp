@@ -18,6 +18,7 @@
 #include "parser.h"
 #include "transform.h"
 #include "transform_indent.h"
+#include "transform_lowercase_commands.h"
 
 using namespace std::placeholders;
 
@@ -128,27 +129,6 @@ class TransformIndentRparen : public Transform {
 					next_token++;
 				}
 			}
-		}
-	}
-};
-
-class TransformLowercaseCommands : public Transform {
-	std::vector<std::pair<std::string, std::string>> describeCommandLine() override {
-		return {{"-lowercase-commands", "Lowercase command names in command invocations."}};
-	}
-
-	bool handleCommandLine(const std::string &arg,
-	                       std::vector<TransformFunction> &formatting_functions) override {
-		if (arg != "-lowercase-commands")
-			return false;
-		formatting_functions.emplace_back(formatLowercaseCommands);
-		return true;
-	}
-
-	static void formatLowercaseCommands(const std::vector<Command> &commands,
-	                                    std::vector<Span> &spans) {
-		for (auto c : commands) {
-			spans[c.identifier].data = lowerstring(spans[c.identifier].data);
 		}
 	}
 };
