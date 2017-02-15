@@ -33,8 +33,11 @@ include_directories(
 )
 
 set(CMAKEFORMAT_SOURCES
+    transform.cpp
     transform_argument_per_line.cpp
     transform_indent.cpp
+    transform_indent_argument.cpp
+    transform_indent_rparen.cpp
     transform_lowercase_commands.cpp
     parser.cpp
     generated/cmListFileLexer.c

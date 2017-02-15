@@ -82,3 +82,9 @@ static inline void REQUIRE_TRANSFORMS_TO(TransformFunction transform, std::strin
 
 	REQUIRE(output == wanted);
 }
+
+struct on_program_load {
+	on_program_load(const std::function<void(void)> &f) {
+		f();
+	}
+};

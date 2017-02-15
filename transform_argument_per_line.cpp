@@ -5,30 +5,12 @@
 #include <functional>
 
 #include "helpers.h"
-#include "transform_argument_per_line.h"
+#include "transform.h"
 
 using namespace std::placeholders;
 
-std::vector<std::pair<std::string, std::string>> TransformArgumentPerLine::describeCommandLine() {
-	return {
-	    {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."}};
-}
-
-bool TransformArgumentPerLine::handleCommandLine(
-    const std::string &arg, std::vector<TransformFunction> &transform_functions) {
-	if (arg.find("-argument-per-line=") != 0) {
-		return false;
-	}
-
-	std::string indent_string = arg.substr(std::string{"-argument-per-line="}.size());
-	replace_all_in_string(indent_string, "\\t", "\t");
-	transform_functions.emplace_back(std::bind(run, _1, _2, indent_string));
-
-	return true;
-};
-
-void TransformArgumentPerLine::run(std::vector<Command> &commands, std::vector<Span> &spans,
-                                   const std::string &argument_indent_string) {
+static void run(std::vector<Command> &commands, std::vector<Span> &spans,
+                const std::string &argument_indent_string) {
 
 	for (auto c : commands) {
 		const std::string ident = lowerstring(spans[c.identifier].data);
@@ -83,8 +65,27 @@ void TransformArgumentPerLine::run(std::vector<Command> &commands, std::vector<S
 	}
 }
 
+static bool handleCommandLine(const std::string &arg,
+                              std::vector<TransformFunction> &transform_functions) {
+	if (arg.find("-argument-per-line=") != 0) {
+		return false;
+	}
+
+	std::string indent_string = arg.substr(std::string{"-argument-per-line="}.size());
+	replace_all_in_string(indent_string, "\\t", "\t");
+	transform_functions.emplace_back(std::bind(run, _1, _2, indent_string));
+
+	return true;
+};
+
+static const on_program_load transform_argument_per_line{[]() {
+	getCommandLineDescriptions().emplace_back(
+	    "-argument-per-line=STRING", "Put each argument on its own line, indented by STRING.");
+	getCommandLineHandlers().emplace_back(&handleCommandLine);
+}};
+
 TEST_CASE("Puts each argument on its own line", "[transform.argument_per_line]") {
-	REQUIRE_TRANSFORMS_TO(std::bind(TransformArgumentPerLine::run, _1, _2, "INDENT "),
+	REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
 	                      R"(
     command(ARG1 ARG2 ARG3)
     cmake_minimum_required(VERSION 3.0)

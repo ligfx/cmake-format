@@ -3,29 +3,29 @@
    details.  */
 
 #include "helpers.h"
-#include "transform_lowercase_commands.h"
 
-std::vector<std::pair<std::string, std::string>> TransformLowercaseCommands::describeCommandLine() {
-	return {{"-lowercase-commands", "Lowercase command names in command invocations."}};
+static void run(const std::vector<Command> &commands, std::vector<Span> &spans) {
+	for (auto c : commands) {
+		spans[c.identifier].data = lowerstring(spans[c.identifier].data);
+	}
 }
 
-bool TransformLowercaseCommands::handleCommandLine(
-    const std::string &arg, std::vector<TransformFunction> &formatting_functions) {
+static bool handleCommandLine(const std::string &arg,
+                              std::vector<TransformFunction> &formatting_functions) {
 	if (arg != "-lowercase-commands")
 		return false;
 	formatting_functions.emplace_back(&run);
 	return true;
 }
 
-void TransformLowercaseCommands::run(const std::vector<Command> &commands,
-                                     std::vector<Span> &spans) {
-	for (auto c : commands) {
-		spans[c.identifier].data = lowerstring(spans[c.identifier].data);
-	}
-}
+static const on_program_load transform_argument_per_line{[]() {
+	getCommandLineDescriptions().emplace_back("-lowercase-commands",
+	                                          "Lowercase command names in command invocations.");
+	getCommandLineHandlers().emplace_back(&handleCommandLine);
+}};
 
 TEST_CASE("Makes command invocations lowercase", "[transform.lowercase_commands]") {
-	REQUIRE_TRANSFORMS_TO(TransformLowercaseCommands::run,
+	REQUIRE_TRANSFORMS_TO(run,
 	                      R"(
 UPPERCASE_COMMAND()
 mIxEdCaSe_CoMmAnD()

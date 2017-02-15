@@ -12,10 +12,8 @@
 #include "parser.h"
 
 using TransformFunction = std::function<void(std::vector<Command> &, std::vector<Span> &)>;
+using HandleCommandLineFunction = std::function<bool(
+    const std::string &arg, std::vector<TransformFunction> &transform_functions)>;
 
-struct Transform {
-	virtual ~Transform() = default;
-	virtual std::vector<std::pair<std::string, std::string>> describeCommandLine() = 0;
-	virtual bool handleCommandLine(const std::string &arg,
-	                               std::vector<TransformFunction> &transform_functions) = 0;
-};
+std::vector<std::pair<std::string, std::string>> &getCommandLineDescriptions();
+std::vector<HandleCommandLineFunction> &getCommandLineHandlers();
