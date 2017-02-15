@@ -14,14 +14,14 @@
 #include <utility>
 #include <vector>
 
-#include "formatting.h"
-#include "formatting_indent.h"
 #include "helpers.h"
 #include "parser.h"
+#include "transform.h"
+#include "transform_indent.h"
 
 using namespace std::placeholders;
 
-class FormatterIndentArgument : public Formatter {
+class TransformIndentArgument : public Transform {
 	std::vector<std::pair<std::string, std::string>> describeCommandLine() override {
 		return {
 		    {"-indent-arguments=align-paren",
@@ -31,17 +31,17 @@ class FormatterIndentArgument : public Formatter {
 	}
 
 	bool handleCommandLine(const std::string &arg,
-	                       std::vector<FormatterFunction> &formatter_functions) override {
+	                       std::vector<TransformFunction> &tranform_functions) override {
 
 		if (arg == "-indent-arguments=align-paren") {
-			formatter_functions.emplace_back(std::bind(run, _1, _2, true, ""));
+			tranform_functions.emplace_back(std::bind(run, _1, _2, true, ""));
 			return true;
 		}
 		if (arg.find("-indent-arguments=") == 0) {
 			std::string argument_indent_string =
 			    arg.substr(std::string{"-indent-arguments="}.size());
 			replace_all_in_string(argument_indent_string, "\\t", "\t");
-			formatter_functions.emplace_back(std::bind(run, _1, _2, false, argument_indent_string));
+			tranform_functions.emplace_back(std::bind(run, _1, _2, false, argument_indent_string));
 			return true;
 		}
 
@@ -85,13 +85,13 @@ class FormatterIndentArgument : public Formatter {
 	}
 };
 
-class FormatterIndentRparen : public Formatter {
+class TransformIndentRparen : public Transform {
 	std::vector<std::pair<std::string, std::string>> describeCommandLine() override {
 		return {{"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."}};
 	}
 
 	bool handleCommandLine(const std::string &arg,
-	                       std::vector<FormatterFunction> &formatter_functions) override {
+	                       std::vector<TransformFunction> &tranform_functions) override {
 		if (arg.find("-indent-rparen=") != 0) {
 			return false;
 		}
@@ -99,7 +99,7 @@ class FormatterIndentRparen : public Formatter {
 		std::string rparen_indent_string = arg.substr(std::string{"-indent-rparen="}.size());
 		replace_all_in_string(rparen_indent_string, "\\t", "\t");
 
-		formatter_functions.emplace_back(std::bind(run, _1, _2, rparen_indent_string));
+		tranform_functions.emplace_back(std::bind(run, _1, _2, rparen_indent_string));
 
 		return true;
 	}
@@ -132,13 +132,13 @@ class FormatterIndentRparen : public Formatter {
 	}
 };
 
-class FormatterLowercaseCommands : public Formatter {
+class TransformLowercaseCommands : public Transform {
 	std::vector<std::pair<std::string, std::string>> describeCommandLine() override {
 		return {{"-lowercase-commands", "Lowercase command names in command invocations."}};
 	}
 
 	bool handleCommandLine(const std::string &arg,
-	                       std::vector<FormatterFunction> &formatting_functions) override {
+	                       std::vector<TransformFunction> &formatting_functions) override {
 		if (arg != "-lowercase-commands")
 			return false;
 		formatting_functions.emplace_back(formatLowercaseCommands);
@@ -155,14 +155,14 @@ class FormatterLowercaseCommands : public Formatter {
 
 int main(int argc, char **argv) {
 
-	std::vector<std::unique_ptr<Formatter>> formatters;
-	formatters.emplace_back(new FormatterLowercaseCommands());
-	formatters.emplace_back(new FormatterIndent());
-	formatters.emplace_back(new FormatterIndentArgument());
-	formatters.emplace_back(new FormatterIndentRparen());
+	std::vector<std::unique_ptr<Transform>> formatters;
+	formatters.emplace_back(new TransformLowercaseCommands());
+	formatters.emplace_back(new TransformIndent());
+	formatters.emplace_back(new TransformIndentArgument());
+	formatters.emplace_back(new TransformIndentRparen());
 
 	bool format_in_place = false;
-	std::vector<FormatterFunction> formatting_functions;
+	std::vector<TransformFunction> formatting_functions;
 
 	std::vector<std::string> filenames;
 	for (int i = 1; i < argc; i++) {

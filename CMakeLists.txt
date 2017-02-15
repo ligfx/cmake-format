@@ -20,7 +20,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 endif()
 
 add_library(libcmakeformat OBJECT
-    formatting_indent.cpp
+    transform_indent.cpp
     parser.cpp
     generated/cmListFileLexer.c
 )
@@ -34,7 +34,7 @@ add_executable(cmake-format
 
 add_executable(cmake-format-tests EXCLUDE_FROM_ALL
     test_main.cpp
-    test_formatting_indent.cpp
+    test_transform_indent.cpp
     test_parsing.cpp
     $<TARGET_OBJECTS:libcmakeformat>
 )

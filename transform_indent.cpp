@@ -4,29 +4,29 @@
 
 #include <functional>
 
-#include "formatting_indent.h"
 #include "helpers.h"
+#include "transform_indent.h"
 
 using namespace std::placeholders;
 
-std::vector<std::pair<std::string, std::string>> FormatterIndent::describeCommandLine() {
+std::vector<std::pair<std::string, std::string>> TransformIndent::describeCommandLine() {
 	return {{"-indent=STRING", "Use STRING for indentation."}};
 }
 
-bool FormatterIndent::handleCommandLine(const std::string &arg,
-                                        std::vector<FormatterFunction> &formatter_functions) {
+bool TransformIndent::handleCommandLine(const std::string &arg,
+                                        std::vector<TransformFunction> &transform_functions) {
 	if (arg.find("-indent=") != 0) {
 		return false;
 	}
 
 	std::string indent_string = arg.substr(std::string{"-indent="}.size());
 	replace_all_in_string(indent_string, "\\t", "\t");
-	formatter_functions.emplace_back(std::bind(run, _1, _2, indent_string));
+	transform_functions.emplace_back(std::bind(run, _1, _2, indent_string));
 
 	return true;
 };
 
-void FormatterIndent::run(const std::vector<Command> &commands, std::vector<Span> &spans,
+void TransformIndent::run(const std::vector<Command> &commands, std::vector<Span> &spans,
                           const std::string &indent_string) {
 	int global_indentation_level = 0;
 	for (auto c : commands) {

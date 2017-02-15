@@ -11,11 +11,11 @@
 
 #include "parser.h"
 
-using FormatterFunction = std::function<void(const std::vector<Command> &, std::vector<Span> &)>;
+using TransformFunction = std::function<void(const std::vector<Command> &, std::vector<Span> &)>;
 
-struct Formatter {
-	virtual ~Formatter() = default;
+struct Transform {
+	virtual ~Transform() = default;
 	virtual std::vector<std::pair<std::string, std::string>> describeCommandLine() = 0;
 	virtual bool handleCommandLine(const std::string &arg,
-	                               std::vector<FormatterFunction> &formatter_functions) = 0;
+	                               std::vector<TransformFunction> &transform_functions) = 0;
 };

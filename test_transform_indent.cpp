@@ -4,13 +4,13 @@
 
 #include <catch.hpp>
 
-#include "formatting_indent.h"
 #include "helpers.h"
 #include "parser.h"
+#include "transform_indent.h"
 
 using namespace std::placeholders;
 
-void REQUIRE_TRANSFORMS_TO(FormatterFunction transform, std::string original, std::string wanted) {
+void REQUIRE_TRANSFORMS_TO(TransformFunction transform, std::string original, std::string wanted) {
 	std::vector<Span> spans;
 	std::vector<Command> commands;
 	std::tie(spans, commands) = parse(original);
@@ -27,8 +27,8 @@ void REQUIRE_TRANSFORMS_TO(FormatterFunction transform, std::string original, st
 	REQUIRE(output == wanted);
 }
 
-TEST_CASE("Reindents toplevel", "[formatting.indent]") {
-	REQUIRE_TRANSFORMS_TO(std::bind(FormatterIndent::run, _1, _2, "INDENT "),
+TEST_CASE("Reindents toplevel", "[transform.indent]") {
+	REQUIRE_TRANSFORMS_TO(std::bind(TransformIndent::run, _1, _2, "INDENT "),
 	                      R"(
    improperly_indented_toplevel()
 correctly_indented_toplevel()
@@ -39,8 +39,8 @@ correctly_indented_toplevel()
 )");
 }
 
-TEST_CASE("Reindents arguments", "[formatting.indent]") {
-	REQUIRE_TRANSFORMS_TO(std::bind(FormatterIndent::run, _1, _2, "INDENT "),
+TEST_CASE("Reindents arguments", "[transform.indent]") {
+	REQUIRE_TRANSFORMS_TO(std::bind(TransformIndent::run, _1, _2, "INDENT "),
 	                      R"(
     command(
        ARGUMENT
@@ -65,8 +65,8 @@ endif()
 )");
 }
 
-TEST_CASE("Reindents comments", "[formatting.indent]") {
-	REQUIRE_TRANSFORMS_TO(std::bind(FormatterIndent::run, _1, _2, "INDENT "),
+TEST_CASE("Reindents comments", "[transform.indent]") {
+	REQUIRE_TRANSFORMS_TO(std::bind(TransformIndent::run, _1, _2, "INDENT "),
 	                      R"(
     # associated comment
     # with multiple lines
@@ -79,8 +79,8 @@ command()
 )");
 }
 
-TEST_CASE("Reindents blocks", "[formatting.indent]") {
-	REQUIRE_TRANSFORMS_TO(std::bind(FormatterIndent::run, _1, _2, "INDENT "),
+TEST_CASE("Reindents blocks", "[transform.indent]") {
+	REQUIRE_TRANSFORMS_TO(std::bind(TransformIndent::run, _1, _2, "INDENT "),
 	                      R"(
    if(CONDITION)
 command()
