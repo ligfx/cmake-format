@@ -28,6 +28,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 endif()
 
 add_library(libcmakeformat OBJECT
+    transform_argument_per_line.cpp
     transform_indent.cpp
     transform_lowercase_commands.cpp
     parser.cpp
@@ -43,6 +44,7 @@ add_executable(cmake-format
 
 add_executable(cmake-format-tests EXCLUDE_FROM_ALL
     test_main.cpp
+    test_transform_argument_per_line.cpp
     test_transform_indent.cpp
     test_transform_lowercase_commands.cpp
     test_parsing.cpp

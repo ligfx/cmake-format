@@ -17,6 +17,7 @@
 #include "helpers.h"
 #include "parser.h"
 #include "transform.h"
+#include "transform_argument_per_line.h"
 #include "transform_indent.h"
 #include "transform_lowercase_commands.h"
 
@@ -136,6 +137,7 @@ class TransformIndentRparen : public Transform {
 int main(int argc, char **argv) {
 
 	std::vector<std::unique_ptr<Transform>> formatters;
+	formatters.emplace_back(new TransformArgumentPerLine());
 	formatters.emplace_back(new TransformLowercaseCommands());
 	formatters.emplace_back(new TransformIndent());
 	formatters.emplace_back(new TransformIndentArgument());
