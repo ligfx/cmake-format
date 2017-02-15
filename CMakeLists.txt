@@ -27,7 +27,12 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
 
-add_library(libcmakeformat OBJECT
+include_directories(
+    3rdparty/catch-1.7.2
+    3rdparty/cmake-3.7.2/Source
+)
+
+set(CMAKEFORMAT_SOURCES
     transform_argument_per_line.cpp
     transform_indent.cpp
     transform_lowercase_commands.cpp
@@ -35,20 +40,15 @@ add_library(libcmakeformat OBJECT
     generated/cmListFileLexer.c
 )
 set_source_files_properties(generated/cmListFileLexer.c PROPERTIES COMPILE_FLAGS -w)
-target_include_directories(libcmakeformat PRIVATE 3rdparty/cmake-3.7.2/Source)
 
 add_executable(cmake-format
     cmake-format.cpp
-    $<TARGET_OBJECTS:libcmakeformat>
+    ${CMAKEFORMAT_SOURCES}
 )
 
 add_executable(cmake-format-tests EXCLUDE_FROM_ALL
-    test_main.cpp
-    test_transform_argument_per_line.cpp
-    test_transform_indent.cpp
-    test_transform_lowercase_commands.cpp
-    test_parsing.cpp
-    $<TARGET_OBJECTS:libcmakeformat>
+    cmake-format-tests.cpp
+    ${CMAKEFORMAT_SOURCES}
 )
-target_include_directories(cmake-format-tests PRIVATE 3rdparty/catch-1.7.2)
+target_compile_definitions(cmake-format-tests PUBLIC CMAKEFORMAT_USE_CATCH)
 add_custom_target(check COMMAND $<TARGET_FILE:cmake-format-tests> --use-colour yes)

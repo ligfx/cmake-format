@@ -23,3 +23,15 @@ void TransformLowercaseCommands::run(const std::vector<Command> &commands,
 		spans[c.identifier].data = lowerstring(spans[c.identifier].data);
 	}
 }
+
+TEST_CASE("Makes command invocations lowercase", "[transform.lowercase_commands]") {
+	REQUIRE_TRANSFORMS_TO(TransformLowercaseCommands::run,
+	                      R"(
+UPPERCASE_COMMAND()
+mIxEdCaSe_CoMmAnD()
+)",
+	                      R"(
+uppercase_command()
+mixedcase_command()
+)");
+}

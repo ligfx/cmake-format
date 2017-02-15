@@ -82,3 +82,26 @@ void TransformArgumentPerLine::run(std::vector<Command> &commands, std::vector<S
 		spans[next_token - 1].data = "\n" + command_indentation;
 	}
 }
+
+TEST_CASE("Puts each argument on its own line", "[transform.argument_per_line]") {
+	REQUIRE_TRANSFORMS_TO(std::bind(TransformArgumentPerLine::run, _1, _2, "INDENT "),
+	                      R"(
+    command(ARG1 ARG2 ARG3)
+    cmake_minimum_required(VERSION 3.0)
+    project(cmake-format)
+)",
+	                      R"(
+    command(
+    INDENT ARG1
+    INDENT ARG2
+    INDENT ARG3
+    )
+    cmake_minimum_required(
+    INDENT VERSION
+    INDENT 3.0
+    )
+    project(
+    INDENT cmake-format
+    )
+)");
+}
