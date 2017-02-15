@@ -4,11 +4,11 @@
 
 #include <catch.hpp>
 
+#include "helpers_catch.h"
 #include "parser.h"
 
 TEST_CASE("Parses CMake code", "[parsing]") {
-	(void)parse(R"(
-
+	REQUIRE_PARSES(R"(
 cmake_command_without_arguments()
 _underscore_cmake_command()
 UPPERCASE_CMAKE_COMMAND()
@@ -32,7 +32,6 @@ simple_cmake_command(
 	${variable_reference_${embedded_variable_reference}}
 	$<$<generator_expression>:value can be anything! ${variable_reference}>
 )
-
 )");
 }
 
@@ -41,5 +40,5 @@ TEST_CASE("Doesn't hang on unbalanced parentheses", "[parsing]") {
 }
 
 TEST_CASE("Parses bare parentheses in arguments", "[parsing]") {
-	(void)parse(R"(simple_cmake_command(()))");
+	REQUIRE_PARSES("simple_cmake_command(some (bare (parentheses)) here)");
 }

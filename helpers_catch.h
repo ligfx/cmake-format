@@ -10,6 +10,22 @@
 #include "parser.h"
 #include "transform.h"
 
+static inline void REQUIRE_PARSES(std::string original) {
+	std::vector<Span> spans;
+	std::vector<Command> commands;
+	std::tie(spans, commands) = parse(original);
+
+	std::string roundtripped;
+	for (const auto &s : spans) {
+		roundtripped += s.data;
+	}
+
+	replace_invisibles_with_visibles(original);
+	replace_invisibles_with_visibles(roundtripped);
+
+	REQUIRE(roundtripped == original);
+}
+
 static inline void REQUIRE_TRANSFORMS_TO(TransformFunction transform, std::string original,
                                          std::string wanted) {
 	std::vector<Span> spans;
