@@ -33,7 +33,7 @@ function enforce_license_header() {
 }
 
 function enforce_c_style() {
-    enforce_license_header | clang-format
+    enforce_license_header | "${CLANG_FORMAT:-clang-format}"
 }
 
 CMAKE_FORMAT=""

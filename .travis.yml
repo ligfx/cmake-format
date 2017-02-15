@@ -7,7 +7,7 @@ script:
 - cmake .
 - cmake --build .
 - cmake --build . --target check
-- ./lint.sh
+- CLANG_FORMAT=clang-format-3.8 ./lint.sh
 - git diff --exit-code
 
 addons:
