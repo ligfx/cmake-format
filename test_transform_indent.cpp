@@ -4,28 +4,10 @@
 
 #include <catch.hpp>
 
-#include "helpers.h"
-#include "parser.h"
+#include "helpers_catch.h"
 #include "transform_indent.h"
 
 using namespace std::placeholders;
-
-void REQUIRE_TRANSFORMS_TO(TransformFunction transform, std::string original, std::string wanted) {
-	std::vector<Span> spans;
-	std::vector<Command> commands;
-	std::tie(spans, commands) = parse(original);
-
-	transform(commands, spans);
-	std::string output;
-	for (auto s : spans) {
-		output += s.data;
-	}
-
-	replace_invisibles_with_visibles(output);
-	replace_invisibles_with_visibles(wanted);
-
-	REQUIRE(output == wanted);
-}
 
 TEST_CASE("Reindents toplevel", "[transform.indent]") {
 	REQUIRE_TRANSFORMS_TO(std::bind(TransformIndent::run, _1, _2, "INDENT "),
