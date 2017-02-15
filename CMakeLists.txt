@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.0)
 project(cmake-format)
 
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "CMAKE_BUILD_TYPE not specified, defaulting to 'Debug'.")
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
+endif()
+
 set(CMAKE_CXX_STANDARD 11)
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
-    add_compile_options(-fcolor-diagnostics)
+    add_compile_options(-fcolor-diagnostics $<$<CONFIG:Debug>:-fsanitize=address>)
+    link_libraries($<$<CONFIG:Debug>:-fsanitize=address>)
 endif()
 if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     add_compile_options(/W4 /WX /EHsc
