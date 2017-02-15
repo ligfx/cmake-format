@@ -44,6 +44,7 @@ add_executable(cmake-format
 add_executable(cmake-format-tests EXCLUDE_FROM_ALL
     test_main.cpp
     test_transform_indent.cpp
+    test_transform_lowercase_commands.cpp
     test_parsing.cpp
     $<TARGET_OBJECTS:libcmakeformat>
 )
