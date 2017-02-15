@@ -6,6 +6,14 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
 endif()
 
+if(UNIX AND EXISTS ${PROJECT_SOURCE_DIR}/.git AND NOT EXISTS ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit)
+    message(STATUS "Linking lint.sh -> .git/hooks/pre-commit")
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E create_symlink ../../lint.sh pre-commit
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/.git/hooks
+    )
+endif()
+
 set(CMAKE_CXX_STANDARD 11)
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
     add_compile_options(-fcolor-diagnostics $<$<CONFIG:Debug>:-fsanitize=address>)
