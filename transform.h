@@ -11,7 +11,7 @@
 
 #include "parser.h"
 
-using TransformFunction = std::function<void(const std::vector<Command> &, std::vector<Span> &)>;
+using TransformFunction = std::function<void(std::vector<Command> &, std::vector<Span> &)>;
 
 struct Transform {
 	virtual ~Transform() = default;
