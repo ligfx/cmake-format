@@ -43,12 +43,10 @@ if ! test "${CMAKE_FORMAT}"; then
     error "Couldn't find executable 'cmake-format'"
 fi
 function enforce_cmake_style() {
-    contents=$(mktemp)
-    cat > "$contents"
     if test "${CMAKE_FORMAT}"; then
-        "${CMAKE_FORMAT}" "$contents" -indent="    " -indent-rparen="" -lowercase-commands
+        "${CMAKE_FORMAT}" -indent="    " -indent-rparen="" -lowercase-commands
     else
-        cat "$contents"
+        cat
     fi
 }
 

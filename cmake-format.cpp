@@ -17,10 +17,28 @@
 #include "parser.h"
 #include "transform.h"
 
+template <typename T, typename U>
+void parse_and_transform_and_write(T &&file_in, U &&file_out,
+                                   const std::vector<TransformFunction> &transform_functions) {
+	std::string content;
+	{ content = {std::istreambuf_iterator<char>(file_in), std::istreambuf_iterator<char>()}; }
+
+	std::vector<Span> spans;
+	std::vector<Command> commands;
+	std::tie(spans, commands) = parse(content);
+
+	for (auto f : transform_functions) {
+		f(commands, spans);
+	}
+	for (auto s : spans) {
+		file_out << s.data;
+	}
+}
+
 int main(int argc, char **argv) {
 
 	bool format_in_place = false;
-	std::vector<TransformFunction> formatting_functions;
+	std::vector<TransformFunction> transform_functions;
 
 	std::vector<std::string> filenames;
 	for (int i = 1; i < argc; i++) {
@@ -29,14 +47,16 @@ int main(int argc, char **argv) {
 			std::smatch reindent_match;
 
 			if ("-help" == arg || "-h" == arg || "--help" == arg) {
-				fprintf(stderr,
-				        "usage: %s [options] [file ...]\n"
-				        "\n"
-				        "Re-formats specified files. If -i is specified, formats files\n"
-				        "in-place; otherwise, writes results to standard output.\n"
-				        "\n",
+				fprintf(stderr, R"(
+usage: %s [options] [file ...]
+
+Re-formats specified files. If no files are specified on the command-line,
+reads from standard input. If -i is specified, formats files in-place;
+otherwise, writes results to standard output.
+
+options:
+)",
 				        argv[0]);
-				fprintf(stderr, "options:\n");
 
 				size_t max_option_size = 0;
 				for (auto const &p : getCommandLineDescriptions()) {
@@ -61,7 +81,7 @@ int main(int argc, char **argv) {
 			} else {
 				bool handled_arg = false;
 				for (const auto &f : getCommandLineHandlers()) {
-					if ((handled_arg = f(arg, formatting_functions))) {
+					if ((handled_arg = f(arg, transform_functions))) {
 						break;
 					}
 				}
@@ -76,40 +96,26 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	if (filenames.size() == 0) {
-		fprintf(stderr, "%s: no filenames specified. Try: %s -help\n", argv[0], argv[0]);
-		exit(1);
-	}
-
-	if (formatting_functions.size() == 0) {
+	if (transform_functions.size() == 0) {
 		fprintf(stderr, "%s: no formatting options specified. Try: %s -help\n", argv[0], argv[0]);
 		exit(1);
 	}
 
-	for (auto filename : filenames) {
-		std::string content;
-		{
-			std::ifstream file{filename};
-			content = {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
-		}
-
-		std::vector<Span> spans;
-		std::vector<Command> commands;
-		std::tie(spans, commands) = parse(content);
-
-		for (auto f : formatting_functions) {
-			f(commands, spans);
-		}
-
+	if (filenames.size() == 0) {
 		if (format_in_place) {
-			std::ofstream file{filename};
-			for (auto s : spans) {
-				file << s.data;
-			}
+			fprintf(stderr, "%s: '-i' specified without any filenames. Try: %s -help\n", argv[0],
+			        argv[0]);
+			exit(1);
+		}
+		parse_and_transform_and_write(std::cin, std::cout, transform_functions);
+	}
+
+	for (auto filename : filenames) {
+		std::ifstream file_in{filename};
+		if (format_in_place) {
+			parse_and_transform_and_write(file_in, std::ofstream{filename}, transform_functions);
 		} else {
-			for (auto s : spans) {
-				std::cout << s.data;
-			}
+			parse_and_transform_and_write(file_in, std::cout, transform_functions);
 		}
 	}
 }
