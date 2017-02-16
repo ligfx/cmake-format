@@ -7,15 +7,17 @@ WIP.
 $ ./cmake-format -help
 usage: ./cmake-format [options] [file ...]
 
-Re-formats specified files. If -i is specified, formats files
-in-place; otherwise, writes results to standard output.
+Re-formats specified files. If no files are specified on the command-line,
+reads from standard input. If -i is specified, formats files in-place;
+otherwise, writes results to standard output.
 
 options:
-  -lowercase-commands            Lowercase command names in command invocations.
+  -argument-per-line=STRING      Put each argument on its own line, indented by STRING.
   -indent=STRING                 Use STRING for indentation.
   -indent-arguments=align-paren  Align arguments on continuing lines with the command's left parenthesis.
   -indent-arguments=STRING       Use STRING for indenting arguments on continuing lines.
   -indent-rparen=STRING          Use STRING for indenting hanging right-parens.
+  -lowercase-commands            Lowercase command names in command invocations.
   -i                             Re-format files in-place.
 ```
 
