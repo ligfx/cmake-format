@@ -53,13 +53,15 @@ void run(const std::vector<Command> &commands, std::vector<Span> &spans,
 		// TODO: use iterators instead of fragile integer indices?
 		std::ptrdiff_t last_token_on_previous_line = c.identifier - 3;
 		while (last_token_on_previous_line >= 0) {
-			if (spans[last_token_on_previous_line].type == SpanType::Comment &&
+			if (last_token_on_previous_line >= 2 &&
+			    spans[last_token_on_previous_line].type == SpanType::Comment &&
 			    spans[last_token_on_previous_line - 1].type == SpanType::Space &&
 			    spans[last_token_on_previous_line - 2].type == SpanType::Newline) {
 				spans[last_token_on_previous_line - 1].data =
 				    repeat_string(indent_string, indentation_level);
 				last_token_on_previous_line -= 3;
-			} else if (spans[last_token_on_previous_line].type == SpanType::Space &&
+			} else if (last_token_on_previous_line >= 1 &&
+			           spans[last_token_on_previous_line].type == SpanType::Space &&
 			           spans[last_token_on_previous_line - 1].type == SpanType::Newline) {
 				last_token_on_previous_line -= 2;
 			} else if (spans[last_token_on_previous_line].type == SpanType::Newline) {
