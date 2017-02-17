@@ -12,6 +12,7 @@ reads from standard input. If -i is specified, formats files in-place;
 otherwise, writes results to standard output.
 
 options:
+  -argument-bin-pack=WIDTH       "Bin pack" arguments, with a maximum column width of WIDTH.
   -argument-per-line=STRING      Put each argument on its own line, indented by STRING.
   -indent=STRING                 Use STRING for indentation.
   -indent-arguments=align-paren  Align arguments on continuing lines with the command's left parenthesis.
@@ -22,7 +23,7 @@ options:
 ```
 
 TODO:
-- [ ] Enforce maximum column width (moving arguments between lines + splitting up arguments to message)
+- [x] Enforce maximum column width (moving arguments between lines + splitting up arguments to message)
 - [ ] Do not specify content in CMake 'else()' parens
 - [ ] lower-case command names in macro/function
 - [ ] check CMAKE_SOURCE_DIR/CMAKE_BINARY_DIR vs PROJECT_SOURCE_DIR/PROJECT_BINARY_DIR
