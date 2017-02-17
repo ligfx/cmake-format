@@ -30,10 +30,12 @@ endif()
 include_directories(
     3rdparty/catch-1.7.2
     3rdparty/cmake-3.7.2/Source
+    3rdparty/akrzemi1-Optional-25713110f
 )
 
 set(CMAKEFORMAT_SOURCES
     transform_argument_bin_pack.cpp
+    transform_argument_heuristic.cpp
     transform_argument_per_line.cpp
     transform_indent.cpp
     transform_indent_rparen.cpp

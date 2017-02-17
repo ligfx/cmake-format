@@ -45,6 +45,7 @@ enum class ReflowArguments {
     None,
     OnePerLine,
     BinPack,
+    Heuristic,
 };
 
 int main(int argc, char **argv) {
@@ -87,7 +88,8 @@ int main(int argc, char **argv) {
         {"-indent-width", "NUMBER", "Use NUMBER spaces for indentation.",
             parse_numeric_option(config.indent_width)},
         {"-reflow-arguments", "ALGORITHM",
-            "Algorithm to reflow command arguments. Available: none, oneperline, binpack",
+            "Algorithm to reflow command arguments. Available: none, oneperline, binpack, "
+            "heuristic",
             [&](const std::string &value) {
                 if (value == "none") {
                     config.reflow_arguments = ReflowArguments::None;
@@ -95,6 +97,8 @@ int main(int argc, char **argv) {
                     config.reflow_arguments = ReflowArguments::OnePerLine;
                 } else if (value == "binpack") {
                     config.reflow_arguments = ReflowArguments::BinPack;
+                } else if (value == "heuristic") {
+                    config.reflow_arguments = ReflowArguments::Heuristic;
                 } else {
                     throw opterror;
                 }
@@ -121,6 +125,9 @@ int main(int argc, char **argv) {
     } else if (config.reflow_arguments == ReflowArguments::OnePerLine) {
         transform_functions.emplace_back(std::bind(transform_argument_per_line, _1, _2,
             repeat_string(" ", config.continuation_indent_width)));
+    } else if (config.reflow_arguments == ReflowArguments::Heuristic) {
+        transform_functions.emplace_back(std::bind(transform_argument_heuristic, _1, _2,
+            config.column_limit, repeat_string(" ", config.continuation_indent_width)));
     }
     if (config.command_case == LetterCase::Lower) {
         transform_functions.emplace_back(&transform_lowercase_commands);
