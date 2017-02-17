@@ -19,14 +19,20 @@ static void delete_span(std::vector<Command> &commands, std::vector<Span> &spans
     }
 }
 
-static void insert_span(std::vector<Command> &commands, std::vector<Span> &spans, size_t span_index,
-                        const Span &new_span) {
-    spans.insert(spans.begin() + span_index, new_span);
+static void insert_before(size_t &span_index, std::vector<Command> &commands,
+                          std::vector<Span> &spans, const std::vector<Span> &new_spans) {
+    spans.insert(spans.begin() + span_index, new_spans.begin(), new_spans.end());
     for (auto &c : commands) {
         if (c.identifier > span_index) {
-            c.identifier++;
+            c.identifier += new_spans.size();
         }
     }
+    span_index += new_spans.size();
+}
+
+static void insert_before(size_t &span_index, std::vector<Command> &commands,
+                          std::vector<Span> &spans, const Span &new_span) {
+    return insert_before(span_index, commands, spans, std::vector<Span>{new_span});
 }
 
 static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t column_width,
@@ -68,27 +74,25 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
             } else if (spans[next_token].type == SpanType::Newline) {
                 delete_span(commands, spans, next_token);
             } else if (spans[next_token].type == SpanType::Comment) {
-                insert_span(commands, spans, next_token, {SpanType::Newline, "\n"});
-                insert_span(commands, spans, next_token + 1,
-                            {SpanType::Space, command_indentation + argument_indent_string});
-                next_token += 3;
-                insert_span(commands, spans, next_token, {SpanType::Newline, "\n"});
-                insert_span(commands, spans, next_token + 1,
-                            {SpanType::Space, command_indentation + argument_indent_string});
-                first_argument = false;
-                line_width = command_indentation.size() + argument_indent_string.size();
+                insert_before(next_token, commands, spans,
+                              {
+                                  {SpanType::Newline, "\n"},
+                                  {SpanType::Space, command_indentation + argument_indent_string},
+                              });
+                next_token++;
+                line_width = column_width;
             } else if (spans[next_token].type == SpanType::Quoted ||
                        spans[next_token].type == SpanType::Unquoted) {
 
-                bool attached_comment = false;
+                bool add_line_break = false;
                 size_t argument_spans_count = 1;
                 if (spans[next_token + 1].type == SpanType::Comment) {
                     argument_spans_count = 2;
-                    attached_comment = true;
+                    add_line_break = true;
                 } else if (spans[next_token + 1].type == SpanType::Space &&
                            spans[next_token + 2].type == SpanType::Comment) {
                     argument_spans_count = 3;
-                    attached_comment = true;
+                    add_line_break = true;
                 }
 
                 size_t argument_size = 0;
@@ -101,23 +105,20 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
                 }
                 if (line_width + argument_size <= column_width) {
                     if (!first_argument) {
-                        insert_span(commands, spans, next_token, {SpanType::Space, " "});
-                        next_token++;
+                        insert_before(next_token, commands, spans, {SpanType::Space, " "});
                     }
                     line_width += argument_size;
-                    if (first_argument) {
-                        first_argument = false;
-                    }
+                    first_argument = false;
                 } else {
-                    insert_span(commands, spans, next_token, {SpanType::Newline, "\n"});
-                    insert_span(commands, spans, next_token + 1,
-                                {SpanType::Space, command_indentation + argument_indent_string});
-                    next_token += 2;
+                    insert_before(
+                        next_token, commands, spans,
+                        {{SpanType::Newline, "\n"},
+                         {SpanType::Space, command_indentation + argument_indent_string}});
                     line_width = command_indentation.size() + argument_indent_string.size() +
                                  argument_size - 1;
                 }
 
-                if (attached_comment) {
+                if (add_line_break) {
                     line_width = column_width;
                 }
 
