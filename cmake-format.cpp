@@ -36,74 +36,24 @@ void parse_and_transform_and_write(
 }
 
 static std::vector<std::pair<std::string, std::string>> command_line_descriptions = {
-    {"-lowercase-commands", "Lowercase command names in command invocations."},
-    {"-indent=STRING", "Use STRING for indentation."},
-    {"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."},
-    {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."},
-    {"-argument-bin-pack=WIDTH", "\"Bin pack\" arguments, with a maximum column width of WIDTH."},
+    {"-command-case=lower|upper", "Letter case of command invocations."},
+    {"-indent-width=NUMBER", "Use NUMBER spaces for indentation."},
+    // {"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."},
+    // {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."},
+    // {"-argument-bin-pack=WIDTH", "\"Bin pack\" arguments, with a maximum column width of
+    // WIDTH."},
 };
 
-using HandleCommandLineFunction = std::function<bool(
-    const std::string &arg, std::vector<TransformFunction> &transform_functions)>;
-
-static std::vector<HandleCommandLineFunction> command_line_handlers = {
-    [](const std::string &arg, std::vector<TransformFunction> &formatting_functions) {
-        if (arg != "-lowercase-commands")
-            return false;
-        formatting_functions.emplace_back(&transform_lowercase_commands);
-        return true;
-    },
-    [](const std::string &arg, std::vector<TransformFunction> &transform_functions) {
-        if (arg.find("-indent=") != 0) {
-            return false;
-        }
-
-        std::string indent_string = arg.substr(std::string{"-indent="}.size());
-        replace_all_in_string(indent_string, "\\t", "\t");
-        transform_functions.emplace_back(std::bind(transform_indent, _1, _2, indent_string));
-
-        return true;
-    },
-    [](const std::string &arg, std::vector<TransformFunction> &tranform_functions) {
-        if (arg.find("-indent-rparen=") != 0) {
-            return false;
-        }
-
-        std::string rparen_indent_string = arg.substr(std::string{"-indent-rparen="}.size());
-        replace_all_in_string(rparen_indent_string, "\\t", "\t");
-
-        tranform_functions.emplace_back(
-            std::bind(transform_indent_rparen, _1, _2, rparen_indent_string));
-
-        return true;
-    },
-    [](const std::string &arg, std::vector<TransformFunction> &transform_functions) {
-        if (arg.find("-argument-per-line=") != 0) {
-            return false;
-        }
-
-        std::string indent_string = arg.substr(std::string{"-argument-per-line="}.size());
-        replace_all_in_string(indent_string, "\\t", "\t");
-        transform_functions.emplace_back(
-            std::bind(transform_argument_per_line, _1, _2, indent_string));
-
-        return true;
-    },
-    [](const std::string &arg, std::vector<TransformFunction> &transform_functions) {
-        if (arg.find("-argument-bin-pack=") != 0) {
-            return false;
-        }
-
-        const size_t width = std::stoi(arg.substr(std::string{"-argument-bin-pack="}.size()));
-        // TODO: allow specifying indent as well as column width
-        transform_functions.emplace_back(
-            std::bind(transform_argument_bin_pack, _1, _2, width, "    "));
-
-        return true;
-    },
+enum class LetterCase {
+    Lower,
+    Upper,
 };
 
 int main(int argc, char **argv) {
+    struct {
+        LetterCase command_case{LetterCase::Lower};
+        size_t indent_width{4};
+    } config;
 
     bool format_in_place = false;
     std::vector<TransformFunction> transform_functions;
@@ -146,13 +96,29 @@ options:
             } else if (arg == "-i") {
                 format_in_place = true;
             } else {
-                bool handled_arg = false;
-                for (const auto &f : command_line_handlers) {
-                    if ((handled_arg = f(arg, transform_functions))) {
-                        break;
+                if (arg == "-indent-width") {
+                    fprintf(
+                        stderr, "%s: for the -indent-width option: requires a value!\n", argv[0]);
+                    exit(1);
+                } else if (arg.find("-indent-width=") == 0) {
+                    config.indent_width =
+                        std::stoi(arg.substr(std::string{"-indent-width="}.size()));
+                } else if (arg == "-command-case") {
+                    fprintf(
+                        stderr, "%s: for the -command-case option: requires a value!\n", argv[0]);
+                    exit(1);
+                } else if (arg.find("-command-case=") == 0) {
+                    const auto command_case = arg.substr(std::string{"-command-case="}.size());
+                    if (command_case == "lower") {
+                        config.command_case = LetterCase::Lower;
+                    } else if (command_case == "upper") {
+                        config.command_case = LetterCase::Upper;
+                    } else {
+                        fprintf(stderr, "%s: for the -command-case option: '%s' value invalid!\n",
+                            argv[0], command_case.c_str());
+                        exit(1);
                     }
-                }
-                if (!handled_arg) {
+                } else {
                     fprintf(stderr, "%s: unrecognized option '%s'. Try: %s -help\n", argv[0],
                         arg.c_str(), argv[0]);
                     exit(1);
@@ -163,8 +129,12 @@ options:
         }
     }
 
-    if (transform_functions.size() == 0) {
-        fprintf(stderr, "%s: no formatting options specified. Try: %s -help\n", argv[0], argv[0]);
+    transform_functions.emplace_back(
+        std::bind(transform_indent, _1, _2, repeat_string(" ", config.indent_width)));
+    if (config.command_case == LetterCase::Lower) {
+        transform_functions.emplace_back(&transform_lowercase_commands);
+    } else {
+        fprintf(stderr, "%s: -command-case=upper is not implemented\n", argv[0]);
         exit(1);
     }
 
