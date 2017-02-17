@@ -20,34 +20,34 @@
 template <typename T, typename U>
 void parse_and_transform_and_write(T &&file_in, U &&file_out,
                                    const std::vector<TransformFunction> &transform_functions) {
-	std::string content;
-	{ content = {std::istreambuf_iterator<char>(file_in), std::istreambuf_iterator<char>()}; }
+    std::string content;
+    { content = {std::istreambuf_iterator<char>(file_in), std::istreambuf_iterator<char>()}; }
 
-	std::vector<Span> spans;
-	std::vector<Command> commands;
-	std::tie(spans, commands) = parse(content);
+    std::vector<Span> spans;
+    std::vector<Command> commands;
+    std::tie(spans, commands) = parse(content);
 
-	for (auto f : transform_functions) {
-		f(commands, spans);
-	}
-	for (auto s : spans) {
-		file_out << s.data;
-	}
+    for (auto f : transform_functions) {
+        f(commands, spans);
+    }
+    for (auto s : spans) {
+        file_out << s.data;
+    }
 }
 
 int main(int argc, char **argv) {
 
-	bool format_in_place = false;
-	std::vector<TransformFunction> transform_functions;
+    bool format_in_place = false;
+    std::vector<TransformFunction> transform_functions;
 
-	std::vector<std::string> filenames;
-	for (int i = 1; i < argc; i++) {
-		const std::string arg{argv[i]};
-		if (arg[0] == '-') {
-			std::smatch reindent_match;
+    std::vector<std::string> filenames;
+    for (int i = 1; i < argc; i++) {
+        const std::string arg{argv[i]};
+        if (arg[0] == '-') {
+            std::smatch reindent_match;
 
-			if ("-help" == arg || "-h" == arg || "--help" == arg) {
-				fprintf(stderr, R"(
+            if ("-help" == arg || "-h" == arg || "--help" == arg) {
+                fprintf(stderr, R"(
 usage: %s [options] [file ...]
 
 Re-formats specified files. If no files are specified on the command-line,
@@ -56,66 +56,66 @@ otherwise, writes results to standard output.
 
 options:
 )",
-				        argv[0]);
+                        argv[0]);
 
-				size_t max_option_size = 0;
-				for (auto const &p : getCommandLineDescriptions()) {
-					max_option_size = std::max(max_option_size, p.first.size());
-				}
+                size_t max_option_size = 0;
+                for (auto const &p : getCommandLineDescriptions()) {
+                    max_option_size = std::max(max_option_size, p.first.size());
+                }
 
-				for (auto const &p : getCommandLineDescriptions()) {
-					std::string opt;
-					std::string description;
-					std::tie(opt, description) = p;
-					fprintf(stderr, "  %s%s  %s\n", opt.c_str(),
-					        repeat_string(" ", max_option_size - opt.size()).c_str(),
-					        description.c_str());
-				}
+                for (auto const &p : getCommandLineDescriptions()) {
+                    std::string opt;
+                    std::string description;
+                    std::tie(opt, description) = p;
+                    fprintf(stderr, "  %s%s  %s\n", opt.c_str(),
+                            repeat_string(" ", max_option_size - opt.size()).c_str(),
+                            description.c_str());
+                }
 
-				fprintf(stderr, "  %s%s  %s\n", "-i",
-				        repeat_string(" ", max_option_size - 2).c_str(),
-				        "Re-format files in-place.");
-				exit(1);
-			} else if (arg == "-i") {
-				format_in_place = true;
-			} else {
-				bool handled_arg = false;
-				for (const auto &f : getCommandLineHandlers()) {
-					if ((handled_arg = f(arg, transform_functions))) {
-						break;
-					}
-				}
-				if (!handled_arg) {
-					fprintf(stderr, "%s: unrecognized option '%s'. Try: %s -help\n", argv[0],
-					        arg.c_str(), argv[0]);
-					exit(1);
-				}
-			}
-		} else {
-			filenames.emplace_back(arg);
-		}
-	}
+                fprintf(stderr, "  %s%s  %s\n", "-i",
+                        repeat_string(" ", max_option_size - 2).c_str(),
+                        "Re-format files in-place.");
+                exit(1);
+            } else if (arg == "-i") {
+                format_in_place = true;
+            } else {
+                bool handled_arg = false;
+                for (const auto &f : getCommandLineHandlers()) {
+                    if ((handled_arg = f(arg, transform_functions))) {
+                        break;
+                    }
+                }
+                if (!handled_arg) {
+                    fprintf(stderr, "%s: unrecognized option '%s'. Try: %s -help\n", argv[0],
+                            arg.c_str(), argv[0]);
+                    exit(1);
+                }
+            }
+        } else {
+            filenames.emplace_back(arg);
+        }
+    }
 
-	if (transform_functions.size() == 0) {
-		fprintf(stderr, "%s: no formatting options specified. Try: %s -help\n", argv[0], argv[0]);
-		exit(1);
-	}
+    if (transform_functions.size() == 0) {
+        fprintf(stderr, "%s: no formatting options specified. Try: %s -help\n", argv[0], argv[0]);
+        exit(1);
+    }
 
-	if (filenames.size() == 0) {
-		if (format_in_place) {
-			fprintf(stderr, "%s: '-i' specified without any filenames. Try: %s -help\n", argv[0],
-			        argv[0]);
-			exit(1);
-		}
-		parse_and_transform_and_write(std::cin, std::cout, transform_functions);
-	}
+    if (filenames.size() == 0) {
+        if (format_in_place) {
+            fprintf(stderr, "%s: '-i' specified without any filenames. Try: %s -help\n", argv[0],
+                    argv[0]);
+            exit(1);
+        }
+        parse_and_transform_and_write(std::cin, std::cout, transform_functions);
+    }
 
-	for (auto filename : filenames) {
-		std::ifstream file_in{filename};
-		if (format_in_place) {
-			parse_and_transform_and_write(file_in, std::ofstream{filename}, transform_functions);
-		} else {
-			parse_and_transform_and_write(file_in, std::cout, transform_functions);
-		}
-	}
+    for (auto filename : filenames) {
+        std::ifstream file_in{filename};
+        if (format_in_place) {
+            parse_and_transform_and_write(file_in, std::ofstream{filename}, transform_functions);
+        } else {
+            parse_and_transform_and_write(file_in, std::cout, transform_functions);
+        }
+    }
 }

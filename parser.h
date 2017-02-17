@@ -9,33 +9,33 @@
 #include <vector>
 
 enum class SpanType {
-	Identifier,
-	Quoted,
-	Unquoted,
-	Newline,
-	Comment,
-	Space,
-	Lparen,
-	Rparen,
+    Identifier,
+    Quoted,
+    Unquoted,
+    Newline,
+    Comment,
+    Space,
+    Lparen,
+    Rparen,
 };
 
 struct Span {
-	Span(const SpanType &type_, const std::string &data_) : type(type_), data(data_) {
-	}
-	SpanType type;
-	std::string data;
+    Span(const SpanType &type_, const std::string &data_) : type(type_), data(data_) {
+    }
+    SpanType type;
+    std::string data;
 };
 
 struct Command {
-	Command(size_t identifer_, std::vector<size_t> arguments_)
-	    : identifier(identifer_), arguments(arguments_) {
-	}
-	size_t identifier;
-	const std::vector<size_t> arguments;
+    Command(size_t identifer_, std::vector<size_t> arguments_)
+        : identifier(identifer_), arguments(arguments_) {
+    }
+    size_t identifier;
+    const std::vector<size_t> arguments;
 };
 
 struct parseexception : public std::runtime_error {
-	explicit parseexception(const std::string &message);
+    explicit parseexception(const std::string &message);
 };
 
 std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &content);

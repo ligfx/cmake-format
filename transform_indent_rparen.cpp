@@ -11,48 +11,48 @@ using namespace std::placeholders;
 
 static void run(const std::vector<Command> &commands, std::vector<Span> &spans,
                 const std::string &rparen_indent_string) {
-	for (auto c : commands) {
-		const std::string ident = lowerstring(spans[c.identifier].data);
+    for (auto c : commands) {
+        const std::string ident = lowerstring(spans[c.identifier].data);
 
-		std::string command_indentation;
-		if (spans[c.identifier - 1].type == SpanType::Newline) {
-			command_indentation = "";
-		} else {
-			command_indentation = spans[c.identifier - 1].data;
-		}
+        std::string command_indentation;
+        if (spans[c.identifier - 1].type == SpanType::Newline) {
+            command_indentation = "";
+        } else {
+            command_indentation = spans[c.identifier - 1].data;
+        }
 
-		// Walk forwards to fix continuation indents.
-		size_t next_token = c.identifier + 1;
-		while (true) {
-			if (spans[next_token].type == SpanType::Rparen) {
-				if (spans[next_token - 2].type == SpanType::Newline) {
-					spans[next_token - 1].data = (command_indentation + rparen_indent_string);
-				}
-				break;
-			} else {
-				next_token++;
-			}
-		}
-	}
+        // Walk forwards to fix continuation indents.
+        size_t next_token = c.identifier + 1;
+        while (true) {
+            if (spans[next_token].type == SpanType::Rparen) {
+                if (spans[next_token - 2].type == SpanType::Newline) {
+                    spans[next_token - 1].data = (command_indentation + rparen_indent_string);
+                }
+                break;
+            } else {
+                next_token++;
+            }
+        }
+    }
 }
 
 static bool handleCommandLine(const std::string &arg,
                               std::vector<TransformFunction> &tranform_functions) {
-	if (arg.find("-indent-rparen=") != 0) {
-		return false;
-	}
+    if (arg.find("-indent-rparen=") != 0) {
+        return false;
+    }
 
-	std::string rparen_indent_string = arg.substr(std::string{"-indent-rparen="}.size());
-	replace_all_in_string(rparen_indent_string, "\\t", "\t");
+    std::string rparen_indent_string = arg.substr(std::string{"-indent-rparen="}.size());
+    replace_all_in_string(rparen_indent_string, "\\t", "\t");
 
-	tranform_functions.emplace_back(std::bind(run, _1, _2, rparen_indent_string));
+    tranform_functions.emplace_back(std::bind(run, _1, _2, rparen_indent_string));
 
-	return true;
+    return true;
 }
 
 static const on_program_load transform_argument_per_line{[]() {
-	getCommandLineDescriptions().emplace_back("-indent-rparen=STRING",
-	                                          "Use STRING for indenting hanging right-parens.");
+    getCommandLineDescriptions().emplace_back("-indent-rparen=STRING",
+                                              "Use STRING for indenting hanging right-parens.");
 
-	getCommandLineHandlers().emplace_back(&handleCommandLine);
+    getCommandLineHandlers().emplace_back(&handleCommandLine);
 }};

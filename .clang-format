@@ -1,6 +1,5 @@
 IndentWidth: 4
 TabWidth: 4
-UseTab: ForIndentation
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false

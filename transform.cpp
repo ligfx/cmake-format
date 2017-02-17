@@ -5,11 +5,11 @@
 #include "transform.h"
 
 std::vector<std::pair<std::string, std::string>> &getCommandLineDescriptions() {
-	static std::vector<std::pair<std::string, std::string>> command_line_descriptions;
-	return command_line_descriptions;
+    static std::vector<std::pair<std::string, std::string>> command_line_descriptions;
+    return command_line_descriptions;
 }
 
 std::vector<HandleCommandLineFunction> &getCommandLineHandlers() {
-	static std::vector<HandleCommandLineFunction> command_line_handlers;
-	return command_line_handlers;
+    static std::vector<HandleCommandLineFunction> command_line_handlers;
+    return command_line_handlers;
 }
