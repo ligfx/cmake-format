@@ -12,9 +12,6 @@ using namespace std::placeholders;
 static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t column_width,
     const std::string &argument_indent_string) {
 
-    (void)column_width;
-    (void)argument_indent_string;
-
     for (auto c : commands) {
         const std::string ident = lowerstring(spans[c.identifier].data);
 
