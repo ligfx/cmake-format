@@ -1,5 +1,6 @@
 IndentWidth: 4
 TabWidth: 4
+AlignAfterOpenBracket: DontAlign
 AllowShortBlocksOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false

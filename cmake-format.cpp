@@ -18,8 +18,8 @@
 #include "transform.h"
 
 template <typename T, typename U>
-void parse_and_transform_and_write(T &&file_in, U &&file_out,
-                                   const std::vector<TransformFunction> &transform_functions) {
+void parse_and_transform_and_write(
+    T &&file_in, U &&file_out, const std::vector<TransformFunction> &transform_functions) {
     std::string content;
     { content = {std::istreambuf_iterator<char>(file_in), std::istreambuf_iterator<char>()}; }
 
@@ -56,7 +56,7 @@ otherwise, writes results to standard output.
 
 options:
 )",
-                        argv[0]);
+                    argv[0]);
 
                 size_t max_option_size = 0;
                 for (auto const &p : getCommandLineDescriptions()) {
@@ -68,13 +68,12 @@ options:
                     std::string description;
                     std::tie(opt, description) = p;
                     fprintf(stderr, "  %s%s  %s\n", opt.c_str(),
-                            repeat_string(" ", max_option_size - opt.size()).c_str(),
-                            description.c_str());
+                        repeat_string(" ", max_option_size - opt.size()).c_str(),
+                        description.c_str());
                 }
 
                 fprintf(stderr, "  %s%s  %s\n", "-i",
-                        repeat_string(" ", max_option_size - 2).c_str(),
-                        "Re-format files in-place.");
+                    repeat_string(" ", max_option_size - 2).c_str(), "Re-format files in-place.");
                 exit(1);
             } else if (arg == "-i") {
                 format_in_place = true;
@@ -87,7 +86,7 @@ options:
                 }
                 if (!handled_arg) {
                     fprintf(stderr, "%s: unrecognized option '%s'. Try: %s -help\n", argv[0],
-                            arg.c_str(), argv[0]);
+                        arg.c_str(), argv[0]);
                     exit(1);
                 }
             }
@@ -104,7 +103,7 @@ options:
     if (filenames.size() == 0) {
         if (format_in_place) {
             fprintf(stderr, "%s: '-i' specified without any filenames. Try: %s -help\n", argv[0],
-                    argv[0]);
+                argv[0]);
             exit(1);
         }
         parse_and_transform_and_write(std::cin, std::cout, transform_functions);

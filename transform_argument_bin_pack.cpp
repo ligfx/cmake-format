@@ -10,7 +10,7 @@
 using namespace std::placeholders;
 
 static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t column_width,
-                const std::string &argument_indent_string) {
+    const std::string &argument_indent_string) {
 
     (void)column_width;
     (void)argument_indent_string;
@@ -39,8 +39,7 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
             } else if (spans[next_token].type == SpanType::Newline) {
                 delete_span(commands, spans, next_token);
             } else if (spans[next_token].type == SpanType::Comment) {
-                insert_span_before(
-                    next_token, commands, spans,
+                insert_span_before(next_token, commands, spans,
                     {
                         {SpanType::Newline, "\n"},
                         {SpanType::Space, command_indentation + argument_indent_string},
@@ -76,10 +75,9 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
                     line_width += argument_size;
                     first_argument = false;
                 } else {
-                    insert_span_before(
-                        next_token, commands, spans,
+                    insert_span_before(next_token, commands, spans,
                         {{SpanType::Newline, "\n"},
-                         {SpanType::Space, command_indentation + argument_indent_string}});
+                            {SpanType::Space, command_indentation + argument_indent_string}});
                     line_width = command_indentation.size() + argument_indent_string.size() +
                                  argument_size - 1;
                 }
@@ -96,14 +94,14 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
 
         if (line_width + 1 >= column_width) {
             insert_span_before(next_token, commands, spans,
-                               {{SpanType::Newline, "\n"},
-                                {SpanType::Space, command_indentation + argument_indent_string}});
+                {{SpanType::Newline, "\n"},
+                    {SpanType::Space, command_indentation + argument_indent_string}});
         }
     }
 }
 
-static bool handleCommandLine(const std::string &arg,
-                              std::vector<TransformFunction> &transform_functions) {
+static bool handleCommandLine(
+    const std::string &arg, std::vector<TransformFunction> &transform_functions) {
     if (arg.find("-argument-bin-pack=") != 0) {
         return false;
     }
@@ -116,15 +114,14 @@ static bool handleCommandLine(const std::string &arg,
 };
 
 static const on_program_load transform_argument_per_line{[]() {
-    getCommandLineDescriptions().emplace_back(
-        "-argument-bin-pack=WIDTH",
+    getCommandLineDescriptions().emplace_back("-argument-bin-pack=WIDTH",
         "\"Bin pack\" arguments, with a maximum column width of WIDTH.");
     getCommandLineHandlers().emplace_back(&handleCommandLine);
 }};
 
 TEST_CASE("Bin packs arguments", "[transform.argument_bin_pack]") {
     REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, 30, "    "),
-                          R"(
+        R"(
 command(ARG1 ARG2 ARG3 ARG4 ARG5 ARG6
     ARG7)
 
@@ -144,7 +141,7 @@ command(
     ARG5 ARG6
     ARG7 ARG8 ARG9 ARG10)
 )",
-                          R"(
+        R"(
 command(ARG1 ARG2 ARG3 ARG4
     ARG5 ARG6 ARG7)
 
@@ -161,28 +158,28 @@ command(ARG1# comment
 )");
 }
 
-TEST_CASE("Puts line break between line-comment and closing paren",
-          "[transform.argument_bin_pack]") {
+TEST_CASE(
+    "Puts line break between line-comment and closing paren", "[transform.argument_bin_pack]") {
     REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, 30, "    "), R"(
 command(
     #comment
 )
 )",
-                          R"(
+        R"(
 command(
     #comment
     )
 )");
 }
 
-TEST_CASE("Puts line break between arg-comment and closing paren",
-          "[transform.argument_bin_pack]") {
+TEST_CASE(
+    "Puts line break between arg-comment and closing paren", "[transform.argument_bin_pack]") {
     REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, 30, "    "),
-                          R"(
+        R"(
 command(ARG # comment
 )
 )",
-                          R"(
+        R"(
 command(ARG # comment
     )
 )");

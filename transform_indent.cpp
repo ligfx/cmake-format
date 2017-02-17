@@ -9,7 +9,7 @@
 using namespace std::placeholders;
 
 void run(const std::vector<Command> &commands, std::vector<Span> &spans,
-         const std::string &indent_string) {
+    const std::string &indent_string) {
     int global_indentation_level = 0;
     for (auto c : commands) {
         const std::string ident = lowerstring(spans[c.identifier].data);
@@ -38,7 +38,7 @@ void run(const std::vector<Command> &commands, std::vector<Span> &spans,
                 } else {
                     spans[next_token + 1].data =
                         (repeat_string(indent_string, indentation_level) +
-                         spans[next_token + 1].data.substr(old_indentation.size()));
+                            spans[next_token + 1].data.substr(old_indentation.size()));
                 }
                 next_token++;
             } else if (spans[next_token].type == SpanType::Rparen) {
@@ -78,8 +78,8 @@ void run(const std::vector<Command> &commands, std::vector<Span> &spans,
     }
 }
 
-bool handleCommandLine(const std::string &arg,
-                       std::vector<TransformFunction> &transform_functions) {
+bool handleCommandLine(
+    const std::string &arg, std::vector<TransformFunction> &transform_functions) {
     if (arg.find("-indent=") != 0) {
         return false;
     }
@@ -98,11 +98,11 @@ static const on_program_load transform_argument_per_line{[]() {
 
 TEST_CASE("Reindents toplevel", "[transform.indent]") {
     REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
-                          R"(
+        R"(
    improperly_indented_toplevel()
 correctly_indented_toplevel()
 )",
-                          R"(
+        R"(
 improperly_indented_toplevel()
 correctly_indented_toplevel()
 )");
@@ -110,7 +110,7 @@ correctly_indented_toplevel()
 
 TEST_CASE("Reindents arguments", "[transform.indent]") {
     REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
-                          R"(
+        R"(
     command(
        ARGUMENT
            ANOTHER_ARGUMENT
@@ -121,7 +121,7 @@ ARGUMENT
 )
 endif()
 )",
-                          R"(
+        R"(
 command(
    ARGUMENT
        ANOTHER_ARGUMENT
@@ -136,12 +136,12 @@ endif()
 
 TEST_CASE("Reindents comments", "[transform.indent]") {
     REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
-                          R"(
+        R"(
     # associated comment
     # with multiple lines
     command()
 )",
-                          R"(
+        R"(
 # associated comment
 # with multiple lines
 command()
@@ -150,7 +150,7 @@ command()
 
 TEST_CASE("Reindents blocks", "[transform.indent]") {
     REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
-                          R"(
+        R"(
    if(CONDITION)
 command()
        if(ANOTHER_CONDITION)
@@ -173,7 +173,7 @@ while()
 command()
 endwhile()
 )",
-                          R"(
+        R"(
 if(CONDITION)
 INDENT command()
 INDENT if(ANOTHER_CONDITION)

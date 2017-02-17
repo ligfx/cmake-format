@@ -10,7 +10,7 @@
 using namespace std::placeholders;
 
 static void run(std::vector<Command> &commands, std::vector<Span> &spans,
-                const std::string &argument_indent_string) {
+    const std::string &argument_indent_string) {
 
     for (auto c : commands) {
         std::string command_indentation = get_command_indentation(c.identifier, spans);
@@ -27,20 +27,19 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans,
             } else if (spans[next_token].type == SpanType::Newline) {
                 delete_span(commands, spans, next_token);
             } else {
-                insert_span_before(
-                    next_token, commands, spans,
+                insert_span_before(next_token, commands, spans,
                     {{SpanType::Newline, "\n"},
-                     {SpanType::Space, command_indentation + argument_indent_string}});
+                        {SpanType::Space, command_indentation + argument_indent_string}});
                 next_token++;
             }
         }
         insert_span_before(next_token, commands, spans,
-                           {{SpanType::Newline, "\n"}, {SpanType::Space, command_indentation}});
+            {{SpanType::Newline, "\n"}, {SpanType::Space, command_indentation}});
     }
 }
 
-static bool handleCommandLine(const std::string &arg,
-                              std::vector<TransformFunction> &transform_functions) {
+static bool handleCommandLine(
+    const std::string &arg, std::vector<TransformFunction> &transform_functions) {
     if (arg.find("-argument-per-line=") != 0) {
         return false;
     }
@@ -60,12 +59,12 @@ static const on_program_load transform_argument_per_line{[]() {
 
 TEST_CASE("Puts each argument on its own line", "[transform.argument_per_line]") {
     REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
-                          R"(
+        R"(
     command(ARG1 ARG2 ARG3)
     cmake_minimum_required(VERSION 3.0)
     project(cmake-format)
 )",
-                          R"(
+        R"(
     command(
     INDENT ARG1
     INDENT ARG2

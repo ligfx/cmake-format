@@ -10,7 +10,7 @@
 using namespace std::placeholders;
 
 static void run(const std::vector<Command> &commands, std::vector<Span> &spans,
-                const std::string &rparen_indent_string) {
+    const std::string &rparen_indent_string) {
     for (auto c : commands) {
         const std::string ident = lowerstring(spans[c.identifier].data);
 
@@ -36,8 +36,8 @@ static void run(const std::vector<Command> &commands, std::vector<Span> &spans,
     }
 }
 
-static bool handleCommandLine(const std::string &arg,
-                              std::vector<TransformFunction> &tranform_functions) {
+static bool handleCommandLine(
+    const std::string &arg, std::vector<TransformFunction> &tranform_functions) {
     if (arg.find("-indent-rparen=") != 0) {
         return false;
     }
@@ -51,8 +51,8 @@ static bool handleCommandLine(const std::string &arg,
 }
 
 static const on_program_load transform_argument_per_line{[]() {
-    getCommandLineDescriptions().emplace_back("-indent-rparen=STRING",
-                                              "Use STRING for indenting hanging right-parens.");
+    getCommandLineDescriptions().emplace_back(
+        "-indent-rparen=STRING", "Use STRING for indenting hanging right-parens.");
 
     getCommandLineHandlers().emplace_back(&handleCommandLine);
 }};

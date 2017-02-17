@@ -10,7 +10,7 @@
 using namespace std::placeholders;
 
 static void run(const std::vector<Command> &commands, std::vector<Span> &spans,
-                bool argument_indent_after_lparen, std::string argument_indent_string) {
+    bool argument_indent_after_lparen, std::string argument_indent_string) {
 
     (void)argument_indent_after_lparen;
 
@@ -45,8 +45,8 @@ static void run(const std::vector<Command> &commands, std::vector<Span> &spans,
     }
 }
 
-static bool handleCommandLine(const std::string &arg,
-                              std::vector<TransformFunction> &tranform_functions) {
+static bool handleCommandLine(
+    const std::string &arg, std::vector<TransformFunction> &tranform_functions) {
 
     if (arg == "-indent-arguments=align-paren") {
         tranform_functions.emplace_back(std::bind(run, _1, _2, true, ""));
@@ -63,8 +63,7 @@ static bool handleCommandLine(const std::string &arg,
 }
 
 static const on_program_load transform_argument_per_line{[]() {
-    getCommandLineDescriptions().emplace_back(
-        "-indent-arguments=align-paren",
+    getCommandLineDescriptions().emplace_back("-indent-arguments=align-paren",
         "Align arguments on continuing lines with the command's left parenthesis.");
     getCommandLineDescriptions().emplace_back(
         "-indent-arguments=STRING", "Use STRING for indenting arguments on continuing lines.");

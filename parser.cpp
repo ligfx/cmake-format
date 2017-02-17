@@ -72,7 +72,7 @@ std::string tokentostring(const cmListFileLexer_Token *token) {
 }
 
 void expecttokentype(const std::string &description, const cmListFileLexer_Token *token,
-                     const std::vector<cmListFileLexer_Type> &wanted_types) {
+    const std::vector<cmListFileLexer_Type> &wanted_types) {
     for (auto w : wanted_types) {
         if (token && token->type == w)
             return;
@@ -129,8 +129,8 @@ std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &cont
         // TODO: investigate replacing direct use of tokens with a shim that:
         // - treats EOI as another token type
         // - doesn't use such frickin' long enum names
-        expecttokentype("whitespace or identifier", lexer.token,
-                        {cmListFileLexer_Token_Identifier});
+        expecttokentype(
+            "whitespace or identifier", lexer.token, {cmListFileLexer_Token_Identifier});
         // HACK: Make sure command identifiers are always preceded by whitespace
         if (spans.size() == 0 || spans.back().type != SpanType::Space) {
             spans.emplace_back(SpanType::Space, "");
