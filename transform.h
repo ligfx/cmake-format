@@ -4,16 +4,17 @@
 
 #pragma once
 
-#include <functional>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "parser.h"
 
-using TransformFunction = std::function<void(std::vector<Command> &, std::vector<Span> &)>;
-using HandleCommandLineFunction = std::function<bool(
-    const std::string &arg, std::vector<TransformFunction> &transform_functions)>;
-
-std::vector<std::pair<std::string, std::string>> &getCommandLineDescriptions();
-std::vector<HandleCommandLineFunction> &getCommandLineHandlers();
+void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Span> &spans,
+    size_t column_width, const std::string &argument_indent_string);
+void transform_argument_per_line(std::vector<Command> &commands, std::vector<Span> &spans,
+    const std::string &argument_indent_string);
+void transform_indent(
+    std::vector<Command> &commands, std::vector<Span> &spans, const std::string &indent_string);
+void transform_indent_rparen(std::vector<Command> &commands, std::vector<Span> &spans,
+    const std::string &rparen_indent_string);
+void transform_lowercase_commands(std::vector<Command> &commands, std::vector<Span> &spans);

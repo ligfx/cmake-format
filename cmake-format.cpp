@@ -35,6 +35,74 @@ void parse_and_transform_and_write(
     }
 }
 
+static std::vector<std::pair<std::string, std::string>> command_line_descriptions = {
+    {"-lowercase-commands", "Lowercase command names in command invocations."},
+    {"-indent=STRING", "Use STRING for indentation."},
+    {"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."},
+    {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."},
+    {"-argument-bin-pack=WIDTH", "\"Bin pack\" arguments, with a maximum column width of WIDTH."},
+};
+
+using HandleCommandLineFunction = std::function<bool(
+    const std::string &arg, std::vector<TransformFunction> &transform_functions)>;
+
+static std::vector<HandleCommandLineFunction> command_line_handlers = {
+    [](const std::string &arg, std::vector<TransformFunction> &formatting_functions) {
+        if (arg != "-lowercase-commands")
+            return false;
+        formatting_functions.emplace_back(&transform_lowercase_commands);
+        return true;
+    },
+    [](const std::string &arg, std::vector<TransformFunction> &transform_functions) {
+        if (arg.find("-indent=") != 0) {
+            return false;
+        }
+
+        std::string indent_string = arg.substr(std::string{"-indent="}.size());
+        replace_all_in_string(indent_string, "\\t", "\t");
+        transform_functions.emplace_back(std::bind(transform_indent, _1, _2, indent_string));
+
+        return true;
+    },
+    [](const std::string &arg, std::vector<TransformFunction> &tranform_functions) {
+        if (arg.find("-indent-rparen=") != 0) {
+            return false;
+        }
+
+        std::string rparen_indent_string = arg.substr(std::string{"-indent-rparen="}.size());
+        replace_all_in_string(rparen_indent_string, "\\t", "\t");
+
+        tranform_functions.emplace_back(
+            std::bind(transform_indent_rparen, _1, _2, rparen_indent_string));
+
+        return true;
+    },
+    [](const std::string &arg, std::vector<TransformFunction> &transform_functions) {
+        if (arg.find("-argument-per-line=") != 0) {
+            return false;
+        }
+
+        std::string indent_string = arg.substr(std::string{"-argument-per-line="}.size());
+        replace_all_in_string(indent_string, "\\t", "\t");
+        transform_functions.emplace_back(
+            std::bind(transform_argument_per_line, _1, _2, indent_string));
+
+        return true;
+    },
+    [](const std::string &arg, std::vector<TransformFunction> &transform_functions) {
+        if (arg.find("-argument-bin-pack=") != 0) {
+            return false;
+        }
+
+        const size_t width = std::stoi(arg.substr(std::string{"-argument-bin-pack="}.size()));
+        // TODO: allow specifying indent as well as column width
+        transform_functions.emplace_back(
+            std::bind(transform_argument_bin_pack, _1, _2, width, "    "));
+
+        return true;
+    },
+};
+
 int main(int argc, char **argv) {
 
     bool format_in_place = false;
@@ -59,11 +127,11 @@ options:
                     argv[0]);
 
                 size_t max_option_size = 0;
-                for (auto const &p : getCommandLineDescriptions()) {
+                for (auto const &p : command_line_descriptions) {
                     max_option_size = std::max(max_option_size, p.first.size());
                 }
 
-                for (auto const &p : getCommandLineDescriptions()) {
+                for (auto const &p : command_line_descriptions) {
                     std::string opt;
                     std::string description;
                     std::tie(opt, description) = p;
@@ -79,7 +147,7 @@ options:
                 format_in_place = true;
             } else {
                 bool handled_arg = false;
-                for (const auto &f : getCommandLineHandlers()) {
+                for (const auto &f : command_line_handlers) {
                     if ((handled_arg = f(arg, transform_functions))) {
                         break;
                     }

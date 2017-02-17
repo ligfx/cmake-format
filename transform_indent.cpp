@@ -2,14 +2,11 @@
    file Copyright.txt or https://opensource.org/licenses/BSD-3-Clause for
    details.  */
 
-#include <functional>
-
 #include "helpers.h"
+#include "transform.h"
 
-using namespace std::placeholders;
-
-void run(const std::vector<Command> &commands, std::vector<Span> &spans,
-    const std::string &indent_string) {
+void transform_indent(
+    std::vector<Command> &commands, std::vector<Span> &spans, const std::string &indent_string) {
     int global_indentation_level = 0;
     for (auto c : commands) {
         const std::string ident = lowerstring(spans[c.identifier].data);
@@ -78,26 +75,8 @@ void run(const std::vector<Command> &commands, std::vector<Span> &spans,
     }
 }
 
-bool handleCommandLine(
-    const std::string &arg, std::vector<TransformFunction> &transform_functions) {
-    if (arg.find("-indent=") != 0) {
-        return false;
-    }
-
-    std::string indent_string = arg.substr(std::string{"-indent="}.size());
-    replace_all_in_string(indent_string, "\\t", "\t");
-    transform_functions.emplace_back(std::bind(run, _1, _2, indent_string));
-
-    return true;
-};
-
-static const on_program_load transform_argument_per_line{[]() {
-    getCommandLineDescriptions().emplace_back("-indent=STRING", "Use STRING for indentation.");
-    getCommandLineHandlers().emplace_back(&handleCommandLine);
-}};
-
 TEST_CASE("Reindents toplevel", "[transform.indent]") {
-    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
         R"(
    improperly_indented_toplevel()
 correctly_indented_toplevel()
@@ -109,7 +88,7 @@ correctly_indented_toplevel()
 }
 
 TEST_CASE("Reindents arguments", "[transform.indent]") {
-    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
         R"(
     command(
        ARGUMENT
@@ -135,7 +114,7 @@ endif()
 }
 
 TEST_CASE("Reindents comments", "[transform.indent]") {
-    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
         R"(
     # associated comment
     # with multiple lines
@@ -149,7 +128,7 @@ command()
 }
 
 TEST_CASE("Reindents blocks", "[transform.indent]") {
-    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
         R"(
    if(CONDITION)
 command()

@@ -33,7 +33,6 @@ include_directories(
 )
 
 set(CMAKEFORMAT_SOURCES
-    transform.cpp
     transform_argument_bin_pack.cpp
     transform_argument_per_line.cpp
     transform_indent.cpp

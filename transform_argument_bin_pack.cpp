@@ -2,15 +2,11 @@
    file Copyright.txt or https://opensource.org/licenses/BSD-3-Clause for
    details.  */
 
-#include <functional>
-
 #include "helpers.h"
 #include "transform.h"
 
-using namespace std::placeholders;
-
-static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t column_width,
-    const std::string &argument_indent_string) {
+void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Span> &spans,
+    size_t column_width, const std::string &argument_indent_string) {
 
     for (auto c : commands) {
         const std::string ident = lowerstring(spans[c.identifier].data);
@@ -97,27 +93,8 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
     }
 }
 
-static bool handleCommandLine(
-    const std::string &arg, std::vector<TransformFunction> &transform_functions) {
-    if (arg.find("-argument-bin-pack=") != 0) {
-        return false;
-    }
-
-    const size_t width = std::stoi(arg.substr(std::string{"-argument-bin-pack="}.size()));
-    // TODO: allow specifying indent as well as column width
-    transform_functions.emplace_back(std::bind(run, _1, _2, width, "    "));
-
-    return true;
-};
-
-static const on_program_load transform_argument_per_line{[]() {
-    getCommandLineDescriptions().emplace_back("-argument-bin-pack=WIDTH",
-        "\"Bin pack\" arguments, with a maximum column width of WIDTH.");
-    getCommandLineHandlers().emplace_back(&handleCommandLine);
-}};
-
 TEST_CASE("Bin packs arguments", "[transform.argument_bin_pack]") {
-    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, 30, "    "),
+    REQUIRE_TRANSFORMS_TO(std::bind(transform_argument_bin_pack, _1, _2, 30, "    "),
         R"(
 command(ARG1 ARG2 ARG3 ARG4 ARG5 ARG6
     ARG7)
@@ -157,7 +134,7 @@ command(ARG1# comment
 
 TEST_CASE(
     "Puts line break between line-comment and closing paren", "[transform.argument_bin_pack]") {
-    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, 30, "    "), R"(
+    REQUIRE_TRANSFORMS_TO(std::bind(transform_argument_bin_pack, _1, _2, 30, "    "), R"(
 command(
     #comment
 )
@@ -171,7 +148,7 @@ command(
 
 TEST_CASE(
     "Puts line break between arg-comment and closing paren", "[transform.argument_bin_pack]") {
-    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, 30, "    "),
+    REQUIRE_TRANSFORMS_TO(std::bind(transform_argument_bin_pack, _1, _2, 30, "    "),
         R"(
 command(ARG # comment
 )

@@ -2,14 +2,10 @@
    file Copyright.txt or https://opensource.org/licenses/BSD-3-Clause for
    details.  */
 
-#include <functional>
-
 #include "helpers.h"
 #include "transform.h"
 
-using namespace std::placeholders;
-
-static void run(const std::vector<Command> &commands, std::vector<Span> &spans,
+void transform_indent_rparen(std::vector<Command> &commands, std::vector<Span> &spans,
     const std::string &rparen_indent_string) {
     for (auto c : commands) {
         const std::string ident = lowerstring(spans[c.identifier].data);
@@ -35,24 +31,3 @@ static void run(const std::vector<Command> &commands, std::vector<Span> &spans,
         }
     }
 }
-
-static bool handleCommandLine(
-    const std::string &arg, std::vector<TransformFunction> &tranform_functions) {
-    if (arg.find("-indent-rparen=") != 0) {
-        return false;
-    }
-
-    std::string rparen_indent_string = arg.substr(std::string{"-indent-rparen="}.size());
-    replace_all_in_string(rparen_indent_string, "\\t", "\t");
-
-    tranform_functions.emplace_back(std::bind(run, _1, _2, rparen_indent_string));
-
-    return true;
-}
-
-static const on_program_load transform_argument_per_line{[]() {
-    getCommandLineDescriptions().emplace_back(
-        "-indent-rparen=STRING", "Use STRING for indenting hanging right-parens.");
-
-    getCommandLineHandlers().emplace_back(&handleCommandLine);
-}};

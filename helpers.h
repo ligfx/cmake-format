@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <functional>
 #include <string>
 
 #include "parser.h"
@@ -20,6 +21,9 @@
 #define TOKENPASTE2(x, y) TOKENPASTE(x, y)
 #define TEST_CASE(x, y) template <typename T> void TOKENPASTE2(test_, __LINE__)()
 #endif
+
+using namespace std::placeholders;
+using TransformFunction = std::function<void(std::vector<Command> &, std::vector<Span> &)>;
 
 static inline void replace_all_in_string(
     std::string &main_string, const std::string &from, const std::string &to) {
@@ -122,9 +126,3 @@ static inline void REQUIRE_TRANSFORMS_TO(
 
     REQUIRE(output == wanted);
 }
-
-struct on_program_load {
-    on_program_load(const std::function<void(void)> &f) {
-        f();
-    }
-};
