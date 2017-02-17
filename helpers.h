@@ -49,6 +49,47 @@ static inline std::string repeat_string(const std::string &val, size_t n) {
     return newval;
 }
 
+static inline void delete_span(std::vector<Command> &commands, std::vector<Span> &spans,
+                               size_t span_index) {
+    spans.erase(spans.begin() + span_index);
+    for (auto &c : commands) {
+        if (c.identifier > span_index) {
+            c.identifier--;
+        }
+    }
+}
+
+static inline void insert_span_before(size_t &span_index, std::vector<Command> &commands,
+                                      std::vector<Span> &spans,
+                                      const std::vector<Span> &new_spans) {
+    spans.insert(spans.begin() + span_index, new_spans.begin(), new_spans.end());
+    for (auto &c : commands) {
+        if (c.identifier > span_index) {
+            c.identifier += new_spans.size();
+        }
+    }
+    span_index += new_spans.size();
+}
+
+static inline void insert_span_before(size_t &span_index, std::vector<Command> &commands,
+                                      std::vector<Span> &spans, const Span &new_span) {
+    return insert_span_before(span_index, commands, spans, std::vector<Span>{new_span});
+}
+
+static inline std::string get_command_indentation(const size_t &identifier_span_index,
+                                                  std::vector<Span> &spans) {
+    const std::string ident = spans[identifier_span_index].data;
+
+    if (identifier_span_index == 0 || spans[identifier_span_index - 1].type == SpanType::Newline) {
+        return "";
+    } else if (spans[identifier_span_index - 1].type == SpanType::Space) {
+        return spans[identifier_span_index - 1].data;
+    } else {
+        throw std::runtime_error("command '" + ident + "' not preceded by space or newline: '" +
+                                 spans[identifier_span_index - 1].data + "'");
+    }
+}
+
 static inline void REQUIRE_PARSES(std::string original) {
     std::vector<Span> spans;
     std::vector<Command> commands;

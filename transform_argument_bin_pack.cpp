@@ -9,46 +9,6 @@
 
 using namespace std::placeholders;
 
-static void delete_span(std::vector<Command> &commands, std::vector<Span> &spans,
-                        size_t span_index) {
-    spans.erase(spans.begin() + span_index);
-    for (auto &c : commands) {
-        if (c.identifier > span_index) {
-            c.identifier--;
-        }
-    }
-}
-
-static void insert_before(size_t &span_index, std::vector<Command> &commands,
-                          std::vector<Span> &spans, const std::vector<Span> &new_spans) {
-    spans.insert(spans.begin() + span_index, new_spans.begin(), new_spans.end());
-    for (auto &c : commands) {
-        if (c.identifier > span_index) {
-            c.identifier += new_spans.size();
-        }
-    }
-    span_index += new_spans.size();
-}
-
-static void insert_before(size_t &span_index, std::vector<Command> &commands,
-                          std::vector<Span> &spans, const Span &new_span) {
-    return insert_before(span_index, commands, spans, std::vector<Span>{new_span});
-}
-
-static std::string get_command_indentation(const size_t &identifier_span_index,
-                                           std::vector<Span> &spans) {
-    const std::string ident = spans[identifier_span_index].data;
-
-    if (identifier_span_index == 0 || spans[identifier_span_index - 1].type == SpanType::Newline) {
-        return "";
-    } else if (spans[identifier_span_index - 1].type == SpanType::Space) {
-        return spans[identifier_span_index - 1].data;
-    } else {
-        throw std::runtime_error("command '" + ident + "' not preceded by space or newline: '" +
-                                 spans[identifier_span_index - 1].data + "'");
-    }
-}
-
 static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t column_width,
                 const std::string &argument_indent_string) {
 
@@ -79,11 +39,12 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
             } else if (spans[next_token].type == SpanType::Newline) {
                 delete_span(commands, spans, next_token);
             } else if (spans[next_token].type == SpanType::Comment) {
-                insert_before(next_token, commands, spans,
-                              {
-                                  {SpanType::Newline, "\n"},
-                                  {SpanType::Space, command_indentation + argument_indent_string},
-                              });
+                insert_span_before(
+                    next_token, commands, spans,
+                    {
+                        {SpanType::Newline, "\n"},
+                        {SpanType::Space, command_indentation + argument_indent_string},
+                    });
                 next_token++;
                 line_width = column_width;
             } else if (spans[next_token].type == SpanType::Quoted ||
@@ -110,12 +71,12 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
                 }
                 if (line_width + argument_size <= column_width) {
                     if (!first_argument) {
-                        insert_before(next_token, commands, spans, {SpanType::Space, " "});
+                        insert_span_before(next_token, commands, spans, {SpanType::Space, " "});
                     }
                     line_width += argument_size;
                     first_argument = false;
                 } else {
-                    insert_before(
+                    insert_span_before(
                         next_token, commands, spans,
                         {{SpanType::Newline, "\n"},
                          {SpanType::Space, command_indentation + argument_indent_string}});
