@@ -35,6 +35,20 @@ static void insert_before(size_t &span_index, std::vector<Command> &commands,
     return insert_before(span_index, commands, spans, std::vector<Span>{new_span});
 }
 
+static std::string get_command_indentation(const size_t &identifier_span_index,
+                                           std::vector<Span> &spans) {
+    const std::string ident = spans[identifier_span_index].data;
+
+    if (identifier_span_index == 0 || spans[identifier_span_index - 1].type == SpanType::Newline) {
+        return "";
+    } else if (spans[identifier_span_index - 1].type == SpanType::Space) {
+        return spans[identifier_span_index - 1].data;
+    } else {
+        throw std::runtime_error("command '" + ident + "' not preceded by space or newline: '" +
+                                 spans[identifier_span_index - 1].data + "'");
+    }
+}
+
 static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t column_width,
                 const std::string &argument_indent_string) {
 
@@ -44,16 +58,7 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
     for (auto c : commands) {
         const std::string ident = lowerstring(spans[c.identifier].data);
 
-        std::string command_indentation;
-        if (spans[c.identifier - 1].type == SpanType::Newline) {
-            command_indentation = "";
-        } else if (spans[c.identifier - 1].type == SpanType::Space) {
-            command_indentation = spans[c.identifier - 1].data;
-        } else {
-            throw std::runtime_error("command '" + ident + "' not preceded by space or newline: '" +
-                                     spans[c.identifier - 1].data + "'");
-        }
-
+        std::string command_indentation = get_command_indentation(c.identifier, spans);
         size_t line_width = command_indentation.size() + ident.size();
 
         size_t next_token = c.identifier + 1;
