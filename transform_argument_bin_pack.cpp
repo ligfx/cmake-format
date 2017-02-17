@@ -93,6 +93,12 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
                 throw std::runtime_error("unexpected '" + spans[next_token].data + "'");
             }
         }
+
+        if (line_width + 1 >= column_width) {
+            insert_span_before(next_token, commands, spans,
+                               {{SpanType::Newline, "\n"},
+                                {SpanType::Space, command_indentation + argument_indent_string}});
+        }
     }
 }
 
@@ -152,5 +158,32 @@ command(ARG1# comment
     ARG3 #a
     ARG4 ARG5 ARG6 ARG7 ARG8
     ARG9 ARG10)
+)");
+}
+
+TEST_CASE("Puts line break between line-comment and closing paren",
+          "[transform.argument_bin_pack]") {
+    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, 30, "    "), R"(
+command(
+    #comment
+)
+)",
+                          R"(
+command(
+    #comment
+    )
+)");
+}
+
+TEST_CASE("Puts line break between arg-comment and closing paren",
+          "[transform.argument_bin_pack]") {
+    REQUIRE_TRANSFORMS_TO(std::bind(run, _1, _2, 30, "    "),
+                          R"(
+command(ARG # comment
+)
+)",
+                          R"(
+command(ARG # comment
+    )
 )");
 }
