@@ -67,9 +67,34 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
 				delete_span(commands, spans, next_token);
 			} else if (spans[next_token].type == SpanType::Newline) {
 				delete_span(commands, spans, next_token);
+			} else if (spans[next_token].type == SpanType::Comment) {
+				insert_span(commands, spans, next_token, {SpanType::Newline, "\n"});
+				insert_span(commands, spans, next_token + 1,
+				            {SpanType::Space, command_indentation + argument_indent_string});
+				next_token += 3;
+				insert_span(commands, spans, next_token, {SpanType::Newline, "\n"});
+				insert_span(commands, spans, next_token + 1,
+				            {SpanType::Space, command_indentation + argument_indent_string});
+				first_argument = false;
+				line_width = command_indentation.size() + argument_indent_string.size();
 			} else if (spans[next_token].type == SpanType::Quoted ||
 			           spans[next_token].type == SpanType::Unquoted) {
-				size_t argument_size = spans[next_token].data.size();
+
+				bool attached_comment = false;
+				size_t argument_spans_count = 1;
+				if (spans[next_token + 1].type == SpanType::Comment) {
+					argument_spans_count = 2;
+					attached_comment = true;
+				} else if (spans[next_token + 1].type == SpanType::Space &&
+				           spans[next_token + 2].type == SpanType::Comment) {
+					argument_spans_count = 3;
+					attached_comment = true;
+				}
+
+				size_t argument_size = 0;
+				for (size_t i = 0; i < argument_spans_count; i++) {
+					argument_size += spans[next_token + i].data.size();
+				}
 
 				if (!first_argument) {
 					argument_size += 1;
@@ -88,11 +113,15 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans, size_t
 					insert_span(commands, spans, next_token + 1,
 					            {SpanType::Space, command_indentation + argument_indent_string});
 					next_token += 2;
-
 					line_width = command_indentation.size() + argument_indent_string.size() +
 					             argument_size - 1;
 				}
-				next_token++;
+
+				if (attached_comment) {
+					line_width = column_width;
+				}
+
+				next_token += argument_spans_count;
 			} else {
 				throw std::runtime_error("unexpected '" + spans[next_token].data + "'");
 			}
@@ -132,6 +161,15 @@ command(
 	ARG3 ARG4
 	ARG5 ARG6
 	ARG7 ARG8 ARG9 ARG10)
+
+command(
+	ARG1# comment
+	# entire line comment
+	ARG2 # comment preceded by space
+	ARG3 #a
+	ARG4
+	ARG5 ARG6
+	ARG7 ARG8 ARG9 ARG10)
 )",
 	                      R"(
 command(ARG1 ARG2 ARG3 ARG4
@@ -140,5 +178,12 @@ command(ARG1 ARG2 ARG3 ARG4
 command(ARG1 ARG2 ARG3 ARG4
     ARG5 ARG6 ARG7 ARG8 ARG9
     ARG10)
+
+command(ARG1# comment
+    # entire line comment
+    ARG2 # comment preceded by space
+    ARG3 #a
+    ARG4 ARG5 ARG6 ARG7 ARG8
+    ARG9 ARG10)
 )");
 }
