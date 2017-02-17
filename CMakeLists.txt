@@ -24,7 +24,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
         /wd4706  # assignment within conditional expression
     )
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
+    add_compile_options(-Wall -Wextra -pedantic -Werror -Wshadow)
 endif()
 
 include_directories(
