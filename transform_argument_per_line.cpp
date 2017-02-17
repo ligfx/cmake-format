@@ -13,17 +13,7 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans,
                 const std::string &argument_indent_string) {
 
     for (auto c : commands) {
-        const std::string ident = lowerstring(spans[c.identifier].data);
-
-        std::string command_indentation;
-        if (spans[c.identifier - 1].type == SpanType::Newline) {
-            command_indentation = "";
-        } else if (spans[c.identifier - 1].type == SpanType::Space) {
-            command_indentation = spans[c.identifier - 1].data;
-        } else {
-            throw std::runtime_error("command '" + ident + "' not preceded by space or newline: '" +
-                                     spans[c.identifier - 1].data + "'");
-        }
+        std::string command_indentation = get_command_indentation(c.identifier, spans);
 
         // Walk forwards to fix argument indents.
         size_t next_token = c.identifier + 1;
@@ -33,35 +23,19 @@ static void run(std::vector<Command> &commands, std::vector<Span> &spans,
         next_token++;
         while (spans[next_token].type != SpanType::Rparen) {
             if (spans[next_token].type == SpanType::Space) {
-                spans[next_token].data = "";
+                delete_span(commands, spans, next_token);
             } else if (spans[next_token].type == SpanType::Newline) {
-                spans[next_token].data = "";
+                delete_span(commands, spans, next_token);
             } else {
-                if (spans[next_token - 1].type != SpanType::Space) {
-                    spans.insert(spans.begin() + next_token, Span{SpanType::Space, ""});
-                    next_token++;
-                    // Fix up commands
-                    for (auto &c : commands) {
-                        if (c.identifier >= next_token) {
-                            c.identifier++;
-                        }
-                    }
-                }
-                spans[next_token - 1].data = "\n" + command_indentation + argument_indent_string;
-            }
-            next_token++;
-        }
-        if (spans[next_token - 1].type != SpanType::Space) {
-            spans.insert(spans.begin() + next_token, Span{SpanType::Space, ""});
-            next_token++;
-            // Fix up commands
-            for (auto &c : commands) {
-                if (c.identifier >= next_token) {
-                    c.identifier++;
-                }
+                insert_span_before(
+                    next_token, commands, spans,
+                    {{SpanType::Newline, "\n"},
+                     {SpanType::Space, command_indentation + argument_indent_string}});
+                next_token++;
             }
         }
-        spans[next_token - 1].data = "\n" + command_indentation;
+        insert_span_before(next_token, commands, spans,
+                           {{SpanType::Newline, "\n"}, {SpanType::Space, command_indentation}});
     }
 }
 
