@@ -44,13 +44,13 @@ enum class ReflowArguments {
 };
 
 int main(int argc, char **argv) {
-    struct {
-        size_t column_limit{80};
-        LetterCase command_case{LetterCase::Lower};
-        size_t continuation_indent_width{0};
-        size_t indent_width{4};
-        ReflowArguments reflow_arguments{ReflowArguments::None};
-    } config;
+
+    size_t column_limit{80};
+    LetterCase command_case{LetterCase::Lower};
+    size_t continuation_indent_width{0};
+    size_t indent_width{4};
+    ReflowArguments reflow_arguments{ReflowArguments::None};
+
     bool quiet = false;
     bool format_in_place = false;
 
@@ -67,33 +67,33 @@ int main(int argc, char **argv) {
     const static std::vector<ArgumentOptionDescription> argument_options = {
         {"-column-limit", "NUMBER",
             "Set maximum column width to NUMBER. If ReflowArguments is None, this does nothing.",
-            parse_numeric_option(config.column_limit)},
+            parse_numeric_option(column_limit)},
         {"-command-case", "CASE", "Letter case of command invocations. Available: lower, upper",
             [&](const std::string &value) {
                 if (value == "lower") {
-                    config.command_case = LetterCase::Lower;
+                    command_case = LetterCase::Lower;
                 } else if (value == "upper") {
-                    config.command_case = LetterCase::Upper;
+                    command_case = LetterCase::Upper;
                 } else {
                     throw opterror;
                 }
             }},
         {"-continuation-indent-width", "NUMBER", "Indent width for line continuations.",
-            parse_numeric_option(config.continuation_indent_width)},
+            parse_numeric_option(continuation_indent_width)},
         {"-indent-width", "NUMBER", "Use NUMBER spaces for indentation.",
-            parse_numeric_option(config.indent_width)},
+            parse_numeric_option(indent_width)},
         {"-reflow-arguments", "ALGORITHM",
             "Algorithm to reflow command arguments. Available: none, oneperline, binpack, "
             "heuristic",
             [&](const std::string &value) {
                 if (value == "none") {
-                    config.reflow_arguments = ReflowArguments::None;
+                    reflow_arguments = ReflowArguments::None;
                 } else if (value == "oneperline") {
-                    config.reflow_arguments = ReflowArguments::OnePerLine;
+                    reflow_arguments = ReflowArguments::OnePerLine;
                 } else if (value == "binpack") {
-                    config.reflow_arguments = ReflowArguments::BinPack;
+                    reflow_arguments = ReflowArguments::BinPack;
                 } else if (value == "heuristic") {
-                    config.reflow_arguments = ReflowArguments::Heuristic;
+                    reflow_arguments = ReflowArguments::Heuristic;
                 } else {
                     throw opterror;
                 }
@@ -107,25 +107,24 @@ int main(int argc, char **argv) {
     std::vector<std::string> filenames =
         parse_command_line(argc, argv, description, switch_options, argument_options);
 
-    if (config.continuation_indent_width == 0) {
-        config.continuation_indent_width = config.indent_width;
+    if (continuation_indent_width == 0) {
+        continuation_indent_width = indent_width;
     }
 
     std::vector<TransformFunction> transform_functions;
     transform_functions.emplace_back(
-        std::bind(transform_indent, _1, _2, repeat_string(" ", config.indent_width)));
-    if (config.reflow_arguments == ReflowArguments::BinPack) {
+        std::bind(transform_indent, _1, _2, repeat_string(" ", indent_width)));
+    if (reflow_arguments == ReflowArguments::BinPack) {
         transform_functions.emplace_back(std::bind(transform_argument_bin_pack, _1, _2,
-            config.column_limit, repeat_string(" ", config.continuation_indent_width)));
-    } else if (config.reflow_arguments == ReflowArguments::OnePerLine) {
-        transform_functions.emplace_back(std::bind(transform_argument_per_line, _1, _2,
-            repeat_string(" ", config.continuation_indent_width)));
-    } else if (config.reflow_arguments == ReflowArguments::Heuristic) {
+            column_limit, repeat_string(" ", continuation_indent_width)));
+    } else if (reflow_arguments == ReflowArguments::OnePerLine) {
+        transform_functions.emplace_back(std::bind(
+            transform_argument_per_line, _1, _2, repeat_string(" ", continuation_indent_width)));
+    } else if (reflow_arguments == ReflowArguments::Heuristic) {
         transform_functions.emplace_back(std::bind(transform_argument_heuristic, _1, _2,
-            config.column_limit, repeat_string(" ", config.continuation_indent_width)));
+            column_limit, repeat_string(" ", continuation_indent_width)));
     }
-    transform_functions.emplace_back(
-        std::bind(transform_command_case, _1, _2, config.command_case));
+    transform_functions.emplace_back(std::bind(transform_command_case, _1, _2, command_case));
 
     if (filenames.size() == 0) {
         if (format_in_place) {
