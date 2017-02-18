@@ -44,7 +44,7 @@ if ! test "${CMAKE_FORMAT}"; then
 fi
 function enforce_cmake_style() {
     if test "${CMAKE_FORMAT}"; then
-        "${CMAKE_FORMAT}" -indent-width=4 -command-case=lower
+        "${CMAKE_FORMAT}" -q -indent-width=4 -command-case=lower
     else
         cat
     fi

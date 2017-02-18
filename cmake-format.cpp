@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
         size_t continuation_indent_width{0};
         size_t indent_width{4};
     } config;
+    bool quiet = false;
     bool format_in_place = false;
 
     const static std::string description =
@@ -57,6 +58,7 @@ int main(int argc, char **argv) {
 
     const static std::vector<SwitchOptionDescription> switch_options = {
         {"-i", "Re-format files in-place.", format_in_place},
+        {"-q", "Quiet mode: suppress informational messages.", quiet},
     };
 
     const static std::vector<ArgumentOptionDescription> argument_options = {
@@ -108,6 +110,11 @@ int main(int argc, char **argv) {
             fprintf(stderr, "%s: '-i' specified without any filenames. Try: %s -help\n", argv[0],
                 argv[0]);
             exit(1);
+        }
+        if (!quiet) {
+            fprintf(stderr,
+                "%s: no filenames specified, reading from stdin and writing to stdout...\n",
+                argv[0]);
         }
         parse_and_transform_and_write(std::cin, std::cout, transform_functions);
     }
