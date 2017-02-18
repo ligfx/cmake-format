@@ -137,23 +137,6 @@ int main(int argc, char **argv) {
         continuation_indent_width = indent_width;
     }
 
-    std::vector<TransformFunction> transform_functions;
-    transform_functions.emplace_back(
-        std::bind(transform_indent, _1, _2, repeat_string(" ", indent_width)));
-    if (reflow_arguments == ReflowArguments::BinPack) {
-        transform_functions.emplace_back(std::bind(transform_argument_bin_pack, _1, _2,
-            column_limit, repeat_string(" ", continuation_indent_width)));
-    } else if (reflow_arguments == ReflowArguments::OnePerLine) {
-        transform_functions.emplace_back(std::bind(
-            transform_argument_per_line, _1, _2, repeat_string(" ", continuation_indent_width)));
-    } else if (reflow_arguments == ReflowArguments::Heuristic) {
-        transform_functions.emplace_back(std::bind(transform_argument_heuristic, _1, _2,
-            column_limit, repeat_string(" ", continuation_indent_width)));
-    }
-    transform_functions.emplace_back(std::bind(transform_command_case, _1, _2, command_case));
-    transform_functions.emplace_back(
-        std::bind(transform_squash_empty_lines, _1, _2, max_empty_lines_to_keep));
-
     if (filenames.size() == 0) {
         if (format_in_place) {
             fprintf(stderr, "%s: '-i' specified without any filenames. Try: %s -help\n", argv[0],
@@ -180,9 +163,19 @@ int main(int argc, char **argv) {
         std::vector<Command> commands;
         std::tie(spans, commands) = parse(content);
 
-        for (auto f : transform_functions) {
-            f(commands, spans);
+        transform_indent(commands, spans, repeat_string(" ", indent_width));
+        if (reflow_arguments == ReflowArguments::BinPack) {
+            transform_argument_bin_pack(
+                commands, spans, column_limit, repeat_string(" ", continuation_indent_width));
+        } else if (reflow_arguments == ReflowArguments::OnePerLine) {
+            transform_argument_per_line(
+                commands, spans, repeat_string(" ", continuation_indent_width));
+        } else if (reflow_arguments == ReflowArguments::Heuristic) {
+            transform_argument_heuristic(
+                commands, spans, column_limit, repeat_string(" ", continuation_indent_width));
         }
+        transform_command_case(commands, spans, command_case);
+        transform_squash_empty_lines(commands, spans, max_empty_lines_to_keep);
 
         outputwrapper file_out;
         if (format_in_place && filename != "-") {
