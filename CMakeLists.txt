@@ -33,7 +33,8 @@ include_directories(
     3rdparty/akrzemi1-Optional-25713110f
 )
 
-set(CMAKEFORMAT_SOURCES
+add_executable(cmake-format
+    cmake-format.cpp
     transform_argument_bin_pack.cpp
     transform_argument_heuristic.cpp
     transform_argument_per_line.cpp
@@ -46,15 +47,6 @@ set(CMAKEFORMAT_SOURCES
     generated/cmListFileLexer.c
 )
 set_source_files_properties(generated/cmListFileLexer.c PROPERTIES COMPILE_FLAGS -w)
+target_compile_definitions(cmake-format PRIVATE $<$<CONFIG:Debug>:CMAKEFORMAT_BUILD_TESTS>)
 
-add_executable(cmake-format
-    cmake-format.cpp
-    ${CMAKEFORMAT_SOURCES}
-)
-
-add_executable(cmake-format-tests EXCLUDE_FROM_ALL
-    cmake-format-tests.cpp
-    ${CMAKEFORMAT_SOURCES}
-)
-target_compile_definitions(cmake-format-tests PUBLIC CMAKEFORMAT_USE_CATCH)
-add_custom_target(check COMMAND $<TARGET_FILE:cmake-format-tests> --use-colour yes)
+add_custom_target(check COMMAND $<TARGET_FILE:cmake-format> -self-test --use-colour yes)

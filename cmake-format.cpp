@@ -13,6 +13,11 @@
 #include <utility>
 #include <vector>
 
+#ifdef CMAKEFORMAT_BUILD_TESTS
+#define CATCH_CONFIG_RUNNER
+#include <catch.hpp>
+#endif
+
 #include "command_line.h"
 #include "helpers.h"
 #include "parser.h"
@@ -66,6 +71,12 @@ enum class ReflowArguments {
 };
 
 int main(int argc, char **argv) {
+#ifdef CMAKEFORMAT_BUILD_TESTS
+    if (argc >= 2 && std::string{argv[1]} == "-self-test") {
+        int result = Catch::Session().run(argc - 1, argv + 1);
+        return result < 0xff ? result : 0xff;
+    }
+#endif
 
     size_t column_limit{80};
     LetterCase command_case{LetterCase::Lower};
@@ -83,10 +94,19 @@ int main(int argc, char **argv) {
         "reads from standard input. If -i is specified, formats files in-place;\n"
         "otherwise, writes results to standard output.";
 
-    const static std::vector<SwitchOptionDescription> switch_options = {
+    static std::vector<SwitchOptionDescription> switch_options = {
         {"-i", "Re-format files in-place.", format_in_place},
         {"-q", "Quiet mode: suppress informational messages.", quiet},
     };
+
+#ifdef CMAKEFORMAT_BUILD_TESTS
+    // Add this for the help text, it should never actually get here.
+    bool self_test_dummy;
+    switch_options.push_back({"-self-test",
+        "Run built-in test suite. This must be the first argument; all others are passed to the "
+        "test runner.",
+        self_test_dummy});
+#endif
 
     const static std::vector<ArgumentOptionDescription> argument_options = {
         {"-column-limit", "NUMBER",

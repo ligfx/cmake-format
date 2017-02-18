@@ -11,7 +11,7 @@
 
 #include "parser.h"
 
-#ifdef CMAKEFORMAT_USE_CATCH
+#ifdef CMAKEFORMAT_BUILD_TESTS
 #include <catch.hpp>
 #else
 #define REQUIRE(x)
