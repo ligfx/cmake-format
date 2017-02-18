@@ -19,42 +19,42 @@
 #include "transform.h"
 
 struct inputwrapper {
-    inputwrapper() : stdin{true} {
+    inputwrapper() : standard{true} {
     }
     void open(const std::string &filename) {
-        stdin = false;
+        standard = false;
         file.open(filename);
     }
 
     operator std::istream &() {
-        if (stdin) {
+        if (standard) {
             return std::cin;
         } else {
             return file;
         }
     }
 
-    bool stdin;
+    bool standard;
     std::ifstream file;
 };
 
 struct outputwrapper {
-    outputwrapper() : stdout{true} {
+    outputwrapper() : standard{true} {
     }
     void open(const std::string &filename) {
-        stdout = false;
+        standard = false;
         file.open(filename);
     }
 
     operator std::ostream &() {
-        if (stdout) {
+        if (standard) {
             return std::cout;
         } else {
             return file;
         }
     }
 
-    bool stdout;
+    bool standard;
     std::ofstream file;
 };
 
@@ -180,6 +180,7 @@ int main(int argc, char **argv) {
         std::tie(spans, commands) = parse(content);
 
         transform_indent(commands, spans, repeat_string(" ", indent_width));
+
         if (reflow_arguments == ReflowArguments::BinPack) {
             transform_argument_bin_pack(
                 commands, spans, column_limit, repeat_string(" ", continuation_indent_width));
