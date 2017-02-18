@@ -18,23 +18,45 @@
 #include "parser.h"
 #include "transform.h"
 
-template <typename T, typename U>
-void parse_and_transform_and_write(
-    T &&file_in, U &&file_out, const std::vector<TransformFunction> &transform_functions) {
-    std::string content;
-    { content = {std::istreambuf_iterator<char>(file_in), std::istreambuf_iterator<char>()}; }
-
-    std::vector<Span> spans;
-    std::vector<Command> commands;
-    std::tie(spans, commands) = parse(content);
-
-    for (auto f : transform_functions) {
-        f(commands, spans);
+struct inputwrapper {
+    inputwrapper() : stdin{true} {
     }
-    for (auto s : spans) {
-        file_out << s.data;
+    void open(const std::string &filename) {
+        stdin = false;
+        file.open(filename);
     }
-}
+
+    operator std::istream &() {
+        if (stdin) {
+            return std::cin;
+        } else {
+            return file;
+        }
+    }
+
+    bool stdin;
+    std::ifstream file;
+};
+
+struct outputwrapper {
+    outputwrapper() : stdout{true} {
+    }
+    void open(const std::string &filename) {
+        stdout = false;
+        file.open(filename);
+    }
+
+    operator std::ostream &() {
+        if (stdout) {
+            return std::cout;
+        } else {
+            return file;
+        }
+    }
+
+    bool stdout;
+    std::ofstream file;
+};
 
 enum class ReflowArguments {
     None,
@@ -143,15 +165,31 @@ int main(int argc, char **argv) {
                 "%s: no filenames specified, reading from stdin and writing to stdout...\n",
                 argv[0]);
         }
-        parse_and_transform_and_write(std::cin, std::cout, transform_functions);
+        filenames.emplace_back("-");
     }
 
     for (auto filename : filenames) {
-        std::ifstream file_in{filename};
-        if (format_in_place) {
-            parse_and_transform_and_write(file_in, std::ofstream{filename}, transform_functions);
-        } else {
-            parse_and_transform_and_write(file_in, std::cout, transform_functions);
+        inputwrapper file_in;
+        if (filename != "-") {
+            file_in.open(filename);
+        };
+        std::string content;
+        { content = {std::istreambuf_iterator<char>(file_in), std::istreambuf_iterator<char>()}; }
+
+        std::vector<Span> spans;
+        std::vector<Command> commands;
+        std::tie(spans, commands) = parse(content);
+
+        for (auto f : transform_functions) {
+            f(commands, spans);
+        }
+
+        outputwrapper file_out;
+        if (format_in_place && filename != "-") {
+            file_out.open(filename);
+        }
+        for (auto s : spans) {
+            (std::ostream &)file_out << s.data;
         }
     }
 }
