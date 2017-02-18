@@ -10,7 +10,6 @@
 #include <string>
 
 #include "parser.h"
-#include "transform.h"
 
 #ifdef CMAKEFORMAT_USE_CATCH
 #include <catch.hpp>
@@ -24,6 +23,11 @@
 
 using namespace std::placeholders;
 using TransformFunction = std::function<void(std::vector<Command> &, std::vector<Span> &)>;
+
+enum class LetterCase {
+    Lower,
+    Upper,
+};
 
 static inline void replace_all_in_string(
     std::string &main_string, const std::string &from, const std::string &to) {
@@ -42,6 +46,13 @@ static inline std::string lowerstring(const std::string &val) {
     std::string newval = val;
     std::transform(
         newval.begin(), newval.end(), newval.begin(), [](char c) { return std::tolower(c); });
+    return newval;
+}
+
+static inline std::string upperstring(const std::string &val) {
+    std::string newval = val;
+    std::transform(
+        newval.begin(), newval.end(), newval.begin(), [](char c) { return std::toupper(c); });
     return newval;
 }
 

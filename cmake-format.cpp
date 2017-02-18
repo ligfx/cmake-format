@@ -36,11 +36,6 @@ void parse_and_transform_and_write(
     }
 }
 
-enum class LetterCase {
-    Lower,
-    Upper,
-};
-
 enum class ReflowArguments {
     None,
     OnePerLine,
@@ -129,12 +124,8 @@ int main(int argc, char **argv) {
         transform_functions.emplace_back(std::bind(transform_argument_heuristic, _1, _2,
             config.column_limit, repeat_string(" ", config.continuation_indent_width)));
     }
-    if (config.command_case == LetterCase::Lower) {
-        transform_functions.emplace_back(&transform_lowercase_commands);
-    } else {
-        fprintf(stderr, "%s: -command-case=upper is not implemented\n", argv[0]);
-        exit(1);
-    }
+    transform_functions.emplace_back(
+        std::bind(transform_command_case, _1, _2, config.command_case));
 
     if (filenames.size() == 0) {
         if (format_in_place) {
