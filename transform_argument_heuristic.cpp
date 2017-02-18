@@ -51,13 +51,13 @@ static bool is_not_command_option(const std::string &value) {
 void transform_argument_heuristic(
     std::vector<Span> &spans, size_t column_width, const std::string &argument_indent_string) {
 
-    size_t next_token = 0;
-    while (next_token < spans.size()) {
-        if (spans[next_token].type != SpanType::CommandIdentifier) {
-            next_token++;
+    size_t current_index = 0;
+    while (current_index < spans.size()) {
+        if (spans[current_index].type != SpanType::CommandIdentifier) {
+            current_index++;
             continue;
         }
-        const size_t identifier_index = next_token;
+        const size_t identifier_index = current_index;
 
         const std::string ident = lowerstring(spans[identifier_index].data);
         std::string command_indentation = get_command_indentation(identifier_index, spans);
@@ -96,48 +96,48 @@ void transform_argument_heuristic(
             three_argument_window(identifier_index, spans, f);
         }
 
-        next_token++;
-        if (spans[next_token].type == SpanType::Space) {
-            line_width += spans[next_token].data.size();
-            next_token++;
+        current_index++;
+        if (spans[current_index].type == SpanType::Space) {
+            line_width += spans[current_index].data.size();
+            current_index++;
         }
-        if (spans[next_token].type != SpanType::Lparen) {
-            throw std::runtime_error("expected lparen, got '" + spans[next_token].data + "'");
+        if (spans[current_index].type != SpanType::Lparen) {
+            throw std::runtime_error("expected lparen, got '" + spans[current_index].data + "'");
         }
-        line_width += spans[next_token].data.size();
-        next_token++;
+        line_width += spans[current_index].data.size();
+        current_index++;
 
         size_t argument_ordinal = 0;
-        while (spans[next_token].type != SpanType::Rparen) {
-            if (spans[next_token].type == SpanType::Space) {
-                delete_span(spans, next_token);
-            } else if (spans[next_token].type == SpanType::Newline) {
-                delete_span(spans, next_token);
-            } else if (spans[next_token].type == SpanType::Comment) {
-                insert_span_before(next_token, spans,
+        while (spans[current_index].type != SpanType::Rparen) {
+            if (spans[current_index].type == SpanType::Space) {
+                delete_span(spans, current_index);
+            } else if (spans[current_index].type == SpanType::Newline) {
+                delete_span(spans, current_index);
+            } else if (spans[current_index].type == SpanType::Comment) {
+                insert_span_before(current_index, spans,
                     {
                         {SpanType::Newline, "\n"},
                         {SpanType::Space, command_indentation + argument_indent_string},
                     });
-                next_token++;
+                current_index++;
                 line_width = column_width;
-            } else if (spans[next_token].type == SpanType::Quoted ||
-                       spans[next_token].type == SpanType::Unquoted) {
+            } else if (spans[current_index].type == SpanType::Quoted ||
+                       spans[current_index].type == SpanType::Unquoted) {
 
                 bool add_line_break = false;
                 size_t argument_spans_count = 1;
-                if (spans[next_token + 1].type == SpanType::Comment) {
+                if (spans[current_index + 1].type == SpanType::Comment) {
                     argument_spans_count = 2;
                     add_line_break = true;
-                } else if (spans[next_token + 1].type == SpanType::Space &&
-                           spans[next_token + 2].type == SpanType::Comment) {
+                } else if (spans[current_index + 1].type == SpanType::Space &&
+                           spans[current_index + 2].type == SpanType::Comment) {
                     argument_spans_count = 3;
                     add_line_break = true;
                 }
 
                 size_t argument_size = 0;
                 for (size_t i = 0; i < argument_spans_count; i++) {
-                    argument_size += spans[next_token + i].data.size();
+                    argument_size += spans[current_index + i].data.size();
                 }
                 if (argument_ordinal != 0) {
                     argument_size += 1;
@@ -146,11 +146,11 @@ void transform_argument_heuristic(
 
                 if (line_width + argument_size <= column_width) {
                     if (argument_ordinal != 0) {
-                        insert_span_before(next_token, spans, {SpanType::Space, " "});
+                        insert_span_before(current_index, spans, {SpanType::Space, " "});
                     }
                     line_width += argument_size;
                 } else {
-                    insert_span_before(next_token, spans,
+                    insert_span_before(current_index, spans,
                         {{SpanType::Newline, "\n"},
                             {SpanType::Space, command_indentation + argument_indent_string}});
                     line_width = command_indentation.size() + argument_indent_string.size() +
@@ -161,20 +161,20 @@ void transform_argument_heuristic(
                     line_width = column_width;
                 }
 
-                next_token += argument_spans_count;
+                current_index += argument_spans_count;
                 argument_ordinal++;
             } else {
-                throw std::runtime_error("unexpected '" + spans[next_token].data + "'");
+                throw std::runtime_error("unexpected '" + spans[current_index].data + "'");
             }
         }
 
         if (line_width + 1 >= column_width) {
-            insert_span_before(next_token, spans,
+            insert_span_before(current_index, spans,
                 {{SpanType::Newline, "\n"},
                     {SpanType::Space, command_indentation + argument_indent_string}});
         }
 
-        next_token++;
+        current_index++;
     }
 }
 

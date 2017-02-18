@@ -9,13 +9,13 @@ void transform_indent(std::vector<Span> &spans, const std::string &indent_string
 
     int global_indentation_level = 0;
 
-    size_t next_token = 0;
-    while (next_token < spans.size()) {
-        if (spans[next_token].type != SpanType::CommandIdentifier) {
-            next_token++;
+    size_t current_index = 0;
+    while (current_index < spans.size()) {
+        if (spans[current_index].type != SpanType::CommandIdentifier) {
+            current_index++;
             continue;
         }
-        const size_t identifier_index = next_token;
+        const size_t identifier_index = current_index;
         const std::string ident = lowerstring(spans[identifier_index].data);
 
         if (ident == "endif" || ident == "endforeach" || ident == "endwhile" ||
@@ -34,21 +34,21 @@ void transform_indent(std::vector<Span> &spans, const std::string &indent_string
         spans[identifier_index - 1].data = repeat_string(indent_string, indentation_level);
 
         // Walk forwards to fix arguments and the closing paren.
-        next_token++;
+        current_index++;
         while (true) {
-            if (spans[next_token].type == SpanType::Newline) {
-                size_t old_indentation_pos = spans[next_token + 1].data.find(old_indentation);
+            if (spans[current_index].type == SpanType::Newline) {
+                size_t old_indentation_pos = spans[current_index + 1].data.find(old_indentation);
                 if (old_indentation_pos != 0) {
                 } else {
-                    spans[next_token + 1].data =
+                    spans[current_index + 1].data =
                         (repeat_string(indent_string, indentation_level) +
-                            spans[next_token + 1].data.substr(old_indentation.size()));
+                            spans[current_index + 1].data.substr(old_indentation.size()));
                 }
-                next_token++;
-            } else if (spans[next_token].type == SpanType::Rparen) {
+                current_index++;
+            } else if (spans[current_index].type == SpanType::Rparen) {
                 break;
             } else {
-                next_token++;
+                current_index++;
             }
         }
 
@@ -79,7 +79,7 @@ void transform_indent(std::vector<Span> &spans, const std::string &indent_string
             ident == "function") {
             global_indentation_level++;
         }
-        next_token++;
+        current_index++;
     }
 }
 

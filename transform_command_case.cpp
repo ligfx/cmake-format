@@ -7,18 +7,18 @@
 
 void transform_command_case(std::vector<Span> &spans, LetterCase letter_case) {
 
-    size_t current_token = 0;
-    while (current_token < spans.size()) {
-        if (spans[current_token].type != SpanType::CommandIdentifier) {
-            current_token++;
+    size_t current_index = 0;
+    while (current_index < spans.size()) {
+        if (spans[current_index].type != SpanType::CommandIdentifier) {
+            current_index++;
             continue;
         }
         if (letter_case == LetterCase::Lower) {
-            spans[current_token].data = lowerstring(spans[current_token].data);
+            spans[current_index].data = lowerstring(spans[current_index].data);
         } else if (letter_case == LetterCase::Upper) {
-            spans[current_token].data = upperstring(spans[current_token].data);
+            spans[current_index].data = upperstring(spans[current_index].data);
         }
-        current_token++;
+        current_index++;
     }
 }
 

@@ -8,36 +8,36 @@
 void transform_argument_per_line(
     std::vector<Span> &spans, const std::string &argument_indent_string) {
 
-    size_t next_token = 0;
-    while (next_token < spans.size()) {
-        if (spans[next_token].type != SpanType::CommandIdentifier) {
-            next_token++;
+    size_t current_index = 0;
+    while (current_index < spans.size()) {
+        if (spans[current_index].type != SpanType::CommandIdentifier) {
+            current_index++;
             continue;
         }
-        const size_t identifier_index = next_token;
+        const size_t identifier_index = current_index;
         std::string command_indentation = get_command_indentation(identifier_index, spans);
 
         // Walk forwards to fix argument indents.
-        next_token++;
-        while (spans[next_token].type != SpanType::Lparen) {
-            next_token++;
+        current_index++;
+        while (spans[current_index].type != SpanType::Lparen) {
+            current_index++;
         }
-        next_token++;
-        while (spans[next_token].type != SpanType::Rparen) {
-            if (spans[next_token].type == SpanType::Space) {
-                delete_span(spans, next_token);
-            } else if (spans[next_token].type == SpanType::Newline) {
-                delete_span(spans, next_token);
+        current_index++;
+        while (spans[current_index].type != SpanType::Rparen) {
+            if (spans[current_index].type == SpanType::Space) {
+                delete_span(spans, current_index);
+            } else if (spans[current_index].type == SpanType::Newline) {
+                delete_span(spans, current_index);
             } else {
-                insert_span_before(next_token, spans,
+                insert_span_before(current_index, spans,
                     {{SpanType::Newline, "\n"},
                         {SpanType::Space, command_indentation + argument_indent_string}});
-                next_token++;
+                current_index++;
             }
         }
-        insert_span_before(
-            next_token, spans, {{SpanType::Newline, "\n"}, {SpanType::Space, command_indentation}});
-        next_token++;
+        insert_span_before(current_index, spans,
+            {{SpanType::Newline, "\n"}, {SpanType::Space, command_indentation}});
+        current_index++;
     }
 }
 
