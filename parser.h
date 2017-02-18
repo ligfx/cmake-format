@@ -9,7 +9,7 @@
 #include <vector>
 
 enum class SpanType {
-    Identifier,
+    CommandIdentifier,
     Quoted,
     Unquoted,
     Newline,

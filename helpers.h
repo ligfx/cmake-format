@@ -24,6 +24,12 @@
 using namespace std::placeholders;
 using TransformFunction = std::function<void(std::vector<Command> &, std::vector<Span> &)>;
 
+enum class SpaceBeforeParens {
+    Never,
+    ControlStatements,
+    Always,
+};
+
 enum class LetterCase {
     Lower,
     Upper,
@@ -74,7 +80,7 @@ static inline void delete_span(
     }
 }
 
-static inline void insert_span_before(size_t &span_index, std::vector<Command> &commands,
+static inline void insert_span_at(const size_t &span_index, std::vector<Command> &commands,
     std::vector<Span> &spans, const std::vector<Span> &new_spans) {
     spans.insert(spans.begin() + span_index, new_spans.begin(), new_spans.end());
     for (auto &c : commands) {
@@ -82,6 +88,16 @@ static inline void insert_span_before(size_t &span_index, std::vector<Command> &
             c.identifier += new_spans.size();
         }
     }
+}
+
+static inline void insert_span_at(const size_t &span_index, std::vector<Command> &commands,
+    std::vector<Span> &spans, const Span &new_span) {
+    return insert_span_at(span_index, commands, spans, std::vector<Span>{new_span});
+}
+
+static inline void insert_span_before(size_t &span_index, std::vector<Command> &commands,
+    std::vector<Span> &spans, const std::vector<Span> &new_spans) {
+    insert_span_at(span_index, commands, spans, new_spans);
     span_index += new_spans.size();
 }
 

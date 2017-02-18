@@ -135,7 +135,7 @@ std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &cont
         if (spans.size() == 0 || spans.back().type != SpanType::Space) {
             spans.emplace_back(SpanType::Space, "");
         }
-        spans.emplace_back(SpanType::Identifier, lexer.token->text);
+        spans.emplace_back(SpanType::CommandIdentifier, lexer.token->text);
         commands.push_back({spans.size() - 1, {}});
         lexer.advance();
 

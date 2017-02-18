@@ -73,6 +73,7 @@ int main(int argc, char **argv) {
     size_t indent_width{4};
     size_t max_empty_lines_to_keep{1};
     ReflowArguments reflow_arguments{ReflowArguments::None};
+    SpaceBeforeParens space_before_parens{SpaceBeforeParens::Never};
 
     bool quiet = false;
     bool format_in_place = false;
@@ -124,6 +125,21 @@ int main(int argc, char **argv) {
                     throw opterror;
                 }
             }},
+        {"-space-before-parens", "CONDITION",
+            "When to put a space before opening parentheses. Available: always, controlstatements, "
+            "never",
+            [&](const std::string &value) {
+                if (value == "always") {
+                    space_before_parens = SpaceBeforeParens::Always;
+                } else if (value == "controlstatements") {
+                    space_before_parens = SpaceBeforeParens::ControlStatements;
+                } else if (value == "never") {
+                    space_before_parens = SpaceBeforeParens::Never;
+                } else {
+                    throw opterror;
+                }
+            }},
+
         // {"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."},
         // {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."},
         // {"-argument-bin-pack=WIDTH", "\"Bin pack\" arguments, with a maximum column width of
@@ -176,6 +192,7 @@ int main(int argc, char **argv) {
         }
         transform_command_case(commands, spans, command_case);
         transform_squash_empty_lines(commands, spans, max_empty_lines_to_keep);
+        transform_space_before_parens(commands, spans, space_before_parens);
 
         outputwrapper file_out;
         if (format_in_place && filename != "-") {
