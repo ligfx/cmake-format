@@ -12,7 +12,7 @@
 #include "parser.h"
 
 #ifdef CMAKEFORMAT_BUILD_TESTS
-#include <catch.hpp>
+#include <doctest/doctest.h>
 #else
 #define REQUIRE(x)
 #define REQUIRE_THROWS(x)

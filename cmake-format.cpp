@@ -14,8 +14,8 @@
 #include <vector>
 
 #ifdef CMAKEFORMAT_BUILD_TESTS
-#define CATCH_CONFIG_RUNNER
-#include <catch.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT
+#include <doctest/doctest.h>
 #endif
 
 #include "command_line.h"
@@ -73,8 +73,9 @@ enum class ReflowArguments {
 int main(int argc, char **argv) {
 #ifdef CMAKEFORMAT_BUILD_TESTS
     if (argc >= 2 && std::string{argv[1]} == "-self-test") {
-        int result = Catch::Session().run(argc - 1, argv + 1);
-        return result < 0xff ? result : 0xff;
+        doctest::Context context;
+        context.applyCommandLine(argc - 1, argv + 1);
+        return context.run();
     }
 #endif
 

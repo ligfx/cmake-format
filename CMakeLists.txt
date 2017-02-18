@@ -28,6 +28,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 endif()
 
 include_directories(
+    3rdparty/doctest-1.1.3
     3rdparty/catch-1.7.2
     3rdparty/cmake-3.7.2/Source
     3rdparty/akrzemi1-Optional-25713110f
@@ -49,4 +50,4 @@ add_executable(cmake-format
 set_source_files_properties(generated/cmListFileLexer.c PROPERTIES COMPILE_FLAGS -w)
 target_compile_definitions(cmake-format PRIVATE $<$<CONFIG:Debug>:CMAKEFORMAT_BUILD_TESTS>)
 
-add_custom_target(check COMMAND $<TARGET_FILE:cmake-format> -self-test --use-colour yes)
+add_custom_target(check COMMAND $<TARGET_FILE:cmake-format> -self-test)
