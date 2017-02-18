@@ -41,6 +41,7 @@ add_executable(cmake-format
     transform_command_case.cpp
     transform_indent.cpp
     transform_indent_rparen.cpp
+    transform_loosen_loop_constructs.cpp
     transform_space_before_parens.cpp
     transform_squash_empty_lines.cpp
     parser.cpp

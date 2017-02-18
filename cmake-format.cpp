@@ -127,6 +127,13 @@ int main(int argc, char **argv) {
             parse_numeric_option(continuation_indent_width)},
         {"-indent-width", "NUMBER", "Use NUMBER spaces for indentation.",
             parse_numeric_option(indent_width)},
+        {"-loosen-loop-constructs", "always",
+            "Remove closing construct arguments in else(), endif(), etc. Always enabled.",
+            [&](const std::string &value) {
+                if (value != "always") {
+                    throw opterror;
+                }
+            }},
         {"-max-empty-lines-to-keep", "NUMBER",
             "The maximum number of consecutive empty lines to keep.",
             parse_numeric_option(max_empty_lines_to_keep)},
@@ -199,6 +206,7 @@ int main(int argc, char **argv) {
         std::vector<Span> spans = parse(content);
 
         transform_indent(spans, repeat_string(" ", indent_width));
+        transform_loosen_loop_constructs(spans);
 
         if (reflow_arguments == ReflowArguments::BinPack) {
             transform_argument_bin_pack(

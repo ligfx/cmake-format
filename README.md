@@ -16,6 +16,7 @@ options:
   -command-case=CASE                 Letter case of command invocations. Available: lower, upper
   -continuation-indent-width=NUMBER  Indent width for line continuations.
   -indent-width=NUMBER               Use NUMBER spaces for indentation.
+  -loosen-loop-constructs=always     Remove closing construct arguments in else(), endif(), etc. Always enabled.
   -max-empty-lines-to-keep=NUMBER    The maximum number of consecutive empty lines to keep.
   -reflow-arguments=ALGORITHM        Algorithm to reflow command arguments. Available: none, oneperline, binpack, heuristic
   -space-before-parens=CONDITION     When to put a space before opening parentheses. Available: always, controlstatements, never
@@ -30,7 +31,7 @@ TODO:
   - [x] Reflow arguments naively
   - [ ] Reflow breaking before boolean operators like AND
   - [ ] Figure out what a function "looks like"; does it have a run of filenames? does it start with an unquoted argument, then a keyword, then a bunch of not-uppercase stuff? is an argument a command-line option? etc.
-- [ ] Do not specify content in CMake 'else()' parens
+- [x] Do not specify content in CMake 'else()' parens
 - [x] lower-case command names in macro/function
 - [ ] check CMAKE_SOURCE_DIR/CMAKE_BINARY_DIR vs PROJECT_SOURCE_DIR/PROJECT_BINARY_DIR
 - [ ] sort items in SET() and LIST(APPEND) and repeated functions (like add_subdirectory, add_definitions, etc)
@@ -38,7 +39,6 @@ TODO:
 - [ ] convert an unquoted argument with double-quotes, into a quoted argument
 - [ ] use LIST(APPEND) and STRING(APPEND) instead of SET(VAR ${VAR} ...)
 - [x] no spaces between command identifiers and opening-parenthesis
-- [ ] no blank lines at end of block
 - [x] maximum blank lines in a row
 - [ ] remove unneeded double quotes around variable references
 - [ ] support bracket comments
