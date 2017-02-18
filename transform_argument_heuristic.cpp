@@ -45,7 +45,7 @@ static void inline three_argument_window(const size_t &identifier_span_index,
 
 static bool is_not_command_option(const std::string &value) {
     return std::any_of(value.begin(), value.end(),
-        [](char c) { return !std::isupper(c) && c != '_' && c != '-'; });
+        [](char c) { return !std::isupper(c) && c != '_' && c != '-' && !std::isdigit(c); });
 }
 
 void transform_argument_heuristic(std::vector<Command> &commands, std::vector<Span> &spans,
