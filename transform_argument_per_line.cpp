@@ -34,7 +34,7 @@ void transform_argument_per_line(std::vector<Command> &commands, std::vector<Spa
     }
 }
 
-TEST_CASE("Puts each argument on its own line", "[transform.argument_per_line]") {
+TEST_CASE("Puts each argument on its own line") {
     REQUIRE_TRANSFORMS_TO(std::bind(transform_argument_per_line, _1, _2, "INDENT "),
         R"(
     command(ARG1 ARG2 ARG3)

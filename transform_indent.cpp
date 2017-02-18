@@ -75,7 +75,7 @@ void transform_indent(
     }
 }
 
-TEST_CASE("Reindents toplevel", "[transform.indent]") {
+TEST_CASE("Reindents toplevel") {
     REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
         R"(
    improperly_indented_toplevel()
@@ -87,7 +87,7 @@ correctly_indented_toplevel()
 )");
 }
 
-TEST_CASE("Reindents arguments", "[transform.indent]") {
+TEST_CASE("Reindents arguments") {
     REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
         R"(
     command(
@@ -113,7 +113,7 @@ endif()
 )");
 }
 
-TEST_CASE("Reindents comments", "[transform.indent]") {
+TEST_CASE("Reindents comments") {
     REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
         R"(
     # associated comment
@@ -127,7 +127,7 @@ command()
 )");
 }
 
-TEST_CASE("Reindents blocks", "[transform.indent]") {
+TEST_CASE("Reindents blocks") {
     REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
         R"(
    if(CONDITION)

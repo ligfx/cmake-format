@@ -28,7 +28,7 @@ void transform_squash_empty_lines(
     }
 }
 
-TEST_CASE("Squashes empty lines", "[transform.squash_empty_lines]") {
+TEST_CASE("Squashes empty lines") {
     REQUIRE_TRANSFORMS_TO(std::bind(transform_squash_empty_lines, _1, _2, 1),
         R"(
 command()

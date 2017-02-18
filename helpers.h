@@ -18,7 +18,7 @@
 #define REQUIRE_THROWS(x)
 #define TOKENPASTE(x, y) x##y
 #define TOKENPASTE2(x, y) TOKENPASTE(x, y)
-#define TEST_CASE(x, y) template <typename T> void TOKENPASTE2(test_, __LINE__)()
+#define TEST_CASE(...) template <typename T> void TOKENPASTE2(test_, __LINE__)()
 #endif
 
 using namespace std::placeholders;
