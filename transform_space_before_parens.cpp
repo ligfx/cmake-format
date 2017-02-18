@@ -4,8 +4,8 @@
 
 #include "transform.h"
 
-void transform_space_before_parens(std::vector<Command> &commands, std::vector<Span> &spans,
-    SpaceBeforeParens space_before_parens) {
+void transform_space_before_parens(
+    std::vector<Span> &spans, SpaceBeforeParens space_before_parens) {
 
     size_t current_index = 0;
     while (current_index < spans.size()) {
@@ -30,10 +30,10 @@ void transform_space_before_parens(std::vector<Command> &commands, std::vector<S
                 if (want_space) {
                     spans[current_index + 1].data = " ";
                 } else {
-                    delete_span(commands, spans, current_index + 1);
+                    delete_span(spans, current_index + 1);
                 }
             } else if (want_space) {
-                insert_span_at(current_index + 1, commands, spans, {SpanType::Space, " "});
+                insert_span_at(current_index + 1, spans, {SpanType::Space, " "});
             }
         }
         current_index++;

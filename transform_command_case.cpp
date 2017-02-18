@@ -5,14 +5,20 @@
 #include "helpers.h"
 #include "transform.h"
 
-void transform_command_case(
-    std::vector<Command> &commands, std::vector<Span> &spans, LetterCase letter_case) {
-    for (auto c : commands) {
-        if (letter_case == LetterCase::Lower) {
-            spans[c.identifier].data = lowerstring(spans[c.identifier].data);
-        } else if (letter_case == LetterCase::Upper) {
-            spans[c.identifier].data = upperstring(spans[c.identifier].data);
+void transform_command_case(std::vector<Span> &spans, LetterCase letter_case) {
+
+    size_t current_token = 0;
+    while (current_token < spans.size()) {
+        if (spans[current_token].type != SpanType::CommandIdentifier) {
+            current_token++;
+            continue;
         }
+        if (letter_case == LetterCase::Lower) {
+            spans[current_token].data = lowerstring(spans[current_token].data);
+        } else if (letter_case == LetterCase::Upper) {
+            spans[current_token].data = upperstring(spans[current_token].data);
+        }
+        current_token++;
     }
 }
 

@@ -48,13 +48,19 @@ static bool is_not_command_option(const std::string &value) {
         [](char c) { return !std::isupper(c) && c != '_' && c != '-' && !std::isdigit(c); });
 }
 
-void transform_argument_heuristic(std::vector<Command> &commands, std::vector<Span> &spans,
-    size_t column_width, const std::string &argument_indent_string) {
+void transform_argument_heuristic(
+    std::vector<Span> &spans, size_t column_width, const std::string &argument_indent_string) {
 
-    for (auto c : commands) {
-        const std::string ident = lowerstring(spans[c.identifier].data);
+    size_t next_token = 0;
+    while (next_token < spans.size()) {
+        if (spans[next_token].type != SpanType::CommandIdentifier) {
+            next_token++;
+            continue;
+        }
+        const size_t identifier_index = next_token;
 
-        std::string command_indentation = get_command_indentation(c.identifier, spans);
+        const std::string ident = lowerstring(spans[identifier_index].data);
+        std::string command_indentation = get_command_indentation(identifier_index, spans);
         size_t line_width = command_indentation.size() + ident.size();
 
         std::vector<size_t> widths;
@@ -87,10 +93,10 @@ void transform_argument_heuristic(std::vector<Command> &commands, std::vector<Sp
                 }
                 argument_ordinal++;
             };
-            three_argument_window(c.identifier, spans, f);
+            three_argument_window(identifier_index, spans, f);
         }
 
-        size_t next_token = c.identifier + 1;
+        next_token++;
         if (spans[next_token].type == SpanType::Space) {
             line_width += spans[next_token].data.size();
             next_token++;
@@ -104,11 +110,11 @@ void transform_argument_heuristic(std::vector<Command> &commands, std::vector<Sp
         size_t argument_ordinal = 0;
         while (spans[next_token].type != SpanType::Rparen) {
             if (spans[next_token].type == SpanType::Space) {
-                delete_span(commands, spans, next_token);
+                delete_span(spans, next_token);
             } else if (spans[next_token].type == SpanType::Newline) {
-                delete_span(commands, spans, next_token);
+                delete_span(spans, next_token);
             } else if (spans[next_token].type == SpanType::Comment) {
-                insert_span_before(next_token, commands, spans,
+                insert_span_before(next_token, spans,
                     {
                         {SpanType::Newline, "\n"},
                         {SpanType::Space, command_indentation + argument_indent_string},
@@ -140,11 +146,11 @@ void transform_argument_heuristic(std::vector<Command> &commands, std::vector<Sp
 
                 if (line_width + argument_size <= column_width) {
                     if (argument_ordinal != 0) {
-                        insert_span_before(next_token, commands, spans, {SpanType::Space, " "});
+                        insert_span_before(next_token, spans, {SpanType::Space, " "});
                     }
                     line_width += argument_size;
                 } else {
-                    insert_span_before(next_token, commands, spans,
+                    insert_span_before(next_token, spans,
                         {{SpanType::Newline, "\n"},
                             {SpanType::Space, command_indentation + argument_indent_string}});
                     line_width = command_indentation.size() + argument_indent_string.size() +
@@ -163,10 +169,12 @@ void transform_argument_heuristic(std::vector<Command> &commands, std::vector<Sp
         }
 
         if (line_width + 1 >= column_width) {
-            insert_span_before(next_token, commands, spans,
+            insert_span_before(next_token, spans,
                 {{SpanType::Newline, "\n"},
                     {SpanType::Space, command_indentation + argument_indent_string}});
         }
+
+        next_token++;
     }
 }
 

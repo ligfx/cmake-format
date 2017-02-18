@@ -26,16 +26,8 @@ struct Span {
     std::string data;
 };
 
-struct Command {
-    Command(size_t identifer_, std::vector<size_t> arguments_)
-        : identifier(identifer_), arguments(arguments_) {
-    }
-    size_t identifier;
-    const std::vector<size_t> arguments;
-};
-
 struct parseexception : public std::runtime_error {
     explicit parseexception(const std::string &message);
 };
 
-std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &content);
+std::vector<Span> parse(const std::string &content);

@@ -175,25 +175,22 @@ int main(int argc, char **argv) {
         std::string content;
         { content = {std::istreambuf_iterator<char>(file_in), std::istreambuf_iterator<char>()}; }
 
-        std::vector<Span> spans;
-        std::vector<Command> commands;
-        std::tie(spans, commands) = parse(content);
+        std::vector<Span> spans = parse(content);
 
-        transform_indent(commands, spans, repeat_string(" ", indent_width));
+        transform_indent(spans, repeat_string(" ", indent_width));
 
         if (reflow_arguments == ReflowArguments::BinPack) {
             transform_argument_bin_pack(
-                commands, spans, column_limit, repeat_string(" ", continuation_indent_width));
+                spans, column_limit, repeat_string(" ", continuation_indent_width));
         } else if (reflow_arguments == ReflowArguments::OnePerLine) {
-            transform_argument_per_line(
-                commands, spans, repeat_string(" ", continuation_indent_width));
+            transform_argument_per_line(spans, repeat_string(" ", continuation_indent_width));
         } else if (reflow_arguments == ReflowArguments::Heuristic) {
             transform_argument_heuristic(
-                commands, spans, column_limit, repeat_string(" ", continuation_indent_width));
+                spans, column_limit, repeat_string(" ", continuation_indent_width));
         }
-        transform_command_case(commands, spans, command_case);
-        transform_squash_empty_lines(commands, spans, max_empty_lines_to_keep);
-        transform_space_before_parens(commands, spans, space_before_parens);
+        transform_command_case(spans, command_case);
+        transform_squash_empty_lines(spans, max_empty_lines_to_keep);
+        transform_space_before_parens(spans, space_before_parens);
 
         outputwrapper file_out;
         if (format_in_place && filename != "-") {

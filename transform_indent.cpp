@@ -5,11 +5,18 @@
 #include "helpers.h"
 #include "transform.h"
 
-void transform_indent(
-    std::vector<Command> &commands, std::vector<Span> &spans, const std::string &indent_string) {
+void transform_indent(std::vector<Span> &spans, const std::string &indent_string) {
+
     int global_indentation_level = 0;
-    for (auto c : commands) {
-        const std::string ident = lowerstring(spans[c.identifier].data);
+
+    size_t next_token = 0;
+    while (next_token < spans.size()) {
+        if (spans[next_token].type != SpanType::CommandIdentifier) {
+            next_token++;
+            continue;
+        }
+        const size_t identifier_index = next_token;
+        const std::string ident = lowerstring(spans[identifier_index].data);
 
         if (ident == "endif" || ident == "endforeach" || ident == "endwhile" ||
             ident == "endmacro" || ident == "endfunction") {
@@ -21,13 +28,13 @@ void transform_indent(
             indentation_level--;
         }
 
-        const std::string old_indentation = spans[c.identifier - 1].data;
+        const std::string old_indentation = spans[identifier_index - 1].data;
 
         // Re-indent the command invocation
-        spans[c.identifier - 1].data = repeat_string(indent_string, indentation_level);
+        spans[identifier_index - 1].data = repeat_string(indent_string, indentation_level);
 
         // Walk forwards to fix arguments and the closing paren.
-        size_t next_token = c.identifier + 1;
+        next_token++;
         while (true) {
             if (spans[next_token].type == SpanType::Newline) {
                 size_t old_indentation_pos = spans[next_token + 1].data.find(old_indentation);
@@ -48,7 +55,7 @@ void transform_indent(
         // Walk backwards to fix comments at the same prior indentation
         // level.
         // TODO: use iterators instead of fragile integer indices?
-        std::ptrdiff_t last_token_on_previous_line = c.identifier - 3;
+        std::ptrdiff_t last_token_on_previous_line = identifier_index - 3;
         while (last_token_on_previous_line >= 0) {
             if (last_token_on_previous_line >= 2 &&
                 spans[last_token_on_previous_line].type == SpanType::Comment &&
@@ -72,6 +79,7 @@ void transform_indent(
             ident == "function") {
             global_indentation_level++;
         }
+        next_token++;
     }
 }
 

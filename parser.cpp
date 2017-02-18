@@ -114,8 +114,7 @@ void parse_argument(std::vector<Span> &spans, Lexer &lexer) {
     }
 }
 
-std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &content) {
-    std::vector<Command> commands;
+std::vector<Span> parse(const std::string &content) {
     std::vector<Span> spans;
 
     Lexer lexer{content};
@@ -136,7 +135,6 @@ std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &cont
             spans.emplace_back(SpanType::Space, "");
         }
         spans.emplace_back(SpanType::CommandIdentifier, lexer.token->text);
-        commands.push_back({spans.size() - 1, {}});
         lexer.advance();
 
         skip_whitespace(spans, lexer);
@@ -156,7 +154,7 @@ std::pair<std::vector<Span>, std::vector<Command>> parse(const std::string &cont
         }
     }
 
-    return std::make_pair(std::move(spans), std::move(commands));
+    return spans;
 }
 
 TEST_CASE("Parses CMake code", "[parsing]") {

@@ -5,20 +5,27 @@
 #include "helpers.h"
 #include "transform.h"
 
-void transform_indent_rparen(std::vector<Command> &commands, std::vector<Span> &spans,
-    const std::string &rparen_indent_string) {
-    for (auto c : commands) {
-        const std::string ident = lowerstring(spans[c.identifier].data);
+void transform_indent_rparen(std::vector<Span> &spans, const std::string &rparen_indent_string) {
+
+    size_t next_token = 0;
+    while (next_token < spans.size()) {
+        if (spans[next_token].type != SpanType::CommandIdentifier) {
+            next_token++;
+            continue;
+        }
+
+        const size_t identifier_index = next_token;
+        const std::string ident = lowerstring(spans[identifier_index].data);
 
         std::string command_indentation;
-        if (spans[c.identifier - 1].type == SpanType::Newline) {
+        if (spans[identifier_index - 1].type == SpanType::Newline) {
             command_indentation = "";
         } else {
-            command_indentation = spans[c.identifier - 1].data;
+            command_indentation = spans[identifier_index - 1].data;
         }
 
         // Walk forwards to fix continuation indents.
-        size_t next_token = c.identifier + 1;
+        next_token++;
         while (true) {
             if (spans[next_token].type == SpanType::Rparen) {
                 if (spans[next_token - 2].type == SpanType::Newline) {
@@ -29,5 +36,6 @@ void transform_indent_rparen(std::vector<Command> &commands, std::vector<Span> &
                 next_token++;
             }
         }
+        next_token++;
     }
 }

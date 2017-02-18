@@ -22,7 +22,6 @@
 #endif
 
 using namespace std::placeholders;
-using TransformFunction = std::function<void(std::vector<Command> &, std::vector<Span> &)>;
 
 enum class SpaceBeforeParens {
     Never,
@@ -70,40 +69,29 @@ static inline std::string repeat_string(const std::string &val, size_t n) {
     return newval;
 }
 
-static inline void delete_span(
-    std::vector<Command> &commands, std::vector<Span> &spans, size_t span_index) {
+static inline void delete_span(std::vector<Span> &spans, size_t span_index) {
     spans.erase(spans.begin() + span_index);
-    for (auto &c : commands) {
-        if (c.identifier > span_index) {
-            c.identifier--;
-        }
-    }
 }
 
-static inline void insert_span_at(const size_t &span_index, std::vector<Command> &commands,
-    std::vector<Span> &spans, const std::vector<Span> &new_spans) {
+static inline void insert_span_at(
+    const size_t &span_index, std::vector<Span> &spans, const std::vector<Span> &new_spans) {
     spans.insert(spans.begin() + span_index, new_spans.begin(), new_spans.end());
-    for (auto &c : commands) {
-        if (c.identifier > span_index) {
-            c.identifier += new_spans.size();
-        }
-    }
 }
 
-static inline void insert_span_at(const size_t &span_index, std::vector<Command> &commands,
-    std::vector<Span> &spans, const Span &new_span) {
-    return insert_span_at(span_index, commands, spans, std::vector<Span>{new_span});
+static inline void insert_span_at(
+    const size_t &span_index, std::vector<Span> &spans, const Span &new_span) {
+    return insert_span_at(span_index, spans, std::vector<Span>{new_span});
 }
 
-static inline void insert_span_before(size_t &span_index, std::vector<Command> &commands,
-    std::vector<Span> &spans, const std::vector<Span> &new_spans) {
-    insert_span_at(span_index, commands, spans, new_spans);
+static inline void insert_span_before(
+    size_t &span_index, std::vector<Span> &spans, const std::vector<Span> &new_spans) {
+    insert_span_at(span_index, spans, new_spans);
     span_index += new_spans.size();
 }
 
-static inline void insert_span_before(size_t &span_index, std::vector<Command> &commands,
-    std::vector<Span> &spans, const Span &new_span) {
-    return insert_span_before(span_index, commands, spans, std::vector<Span>{new_span});
+static inline void insert_span_before(
+    size_t &span_index, std::vector<Span> &spans, const Span &new_span) {
+    return insert_span_before(span_index, spans, std::vector<Span>{new_span});
 }
 
 static inline std::string get_command_indentation(
@@ -121,9 +109,7 @@ static inline std::string get_command_indentation(
 }
 
 static inline void REQUIRE_PARSES(std::string original) {
-    std::vector<Span> spans;
-    std::vector<Command> commands;
-    std::tie(spans, commands) = parse(original);
+    std::vector<Span> spans = parse(original);
 
     std::string roundtripped;
     for (const auto &s : spans) {
@@ -139,11 +125,9 @@ static inline void REQUIRE_PARSES(std::string original) {
 template <typename F, typename... Args>
 static inline void REQUIRE_TRANSFORMS_TO(
     std::string original, std::string wanted, F transform, Args... args) {
-    std::vector<Span> spans;
-    std::vector<Command> commands;
-    std::tie(spans, commands) = parse(original);
+    std::vector<Span> spans = parse(original);
 
-    transform(commands, spans, args...);
+    transform(spans, args...);
     std::string output;
     for (auto s : spans) {
         output += s.data;
