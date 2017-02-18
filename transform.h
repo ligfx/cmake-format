@@ -16,9 +16,9 @@ void transform_argument_heuristic(std::vector<Command> &commands, std::vector<Sp
     size_t column_limit, const std::string &argument_indent_string);
 void transform_argument_per_line(std::vector<Command> &commands, std::vector<Span> &spans,
     const std::string &argument_indent_string);
+void transform_command_case(
+    std::vector<Command> &commands, std::vector<Span> &spans, LetterCase letter_case);
 void transform_indent(
     std::vector<Command> &commands, std::vector<Span> &spans, const std::string &indent_string);
 void transform_indent_rparen(std::vector<Command> &commands, std::vector<Span> &spans,
     const std::string &rparen_indent_string);
-void transform_command_case(
-    std::vector<Command> &commands, std::vector<Span> &spans, LetterCase letter_case);
