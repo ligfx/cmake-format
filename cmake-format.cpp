@@ -41,12 +41,19 @@ enum class LetterCase {
     Upper,
 };
 
+enum class ReflowArguments {
+    None,
+    OnePerLine,
+    BinPack,
+};
+
 int main(int argc, char **argv) {
     struct {
-        size_t column_limit{0};
+        size_t column_limit{80};
         LetterCase command_case{LetterCase::Lower};
         size_t continuation_indent_width{0};
         size_t indent_width{4};
+        ReflowArguments reflow_arguments{ReflowArguments::None};
     } config;
     bool quiet = false;
     bool format_in_place = false;
@@ -62,9 +69,10 @@ int main(int argc, char **argv) {
     };
 
     const static std::vector<ArgumentOptionDescription> argument_options = {
-        {"-column-limit", "NUMBER", "Reflow arguments with maximum column width of NUMBER",
+        {"-column-limit", "NUMBER",
+            "Set maximum column width to NUMBER. If ReflowArguments is None, this does nothing.",
             parse_numeric_option(config.column_limit)},
-        {"-command-case", "\"lower\"|\"upper\"", "Letter case of command invocations.",
+        {"-command-case", "CASE", "Letter case of command invocations. Available: lower, upper",
             [&](const std::string &value) {
                 if (value == "lower") {
                     config.command_case = LetterCase::Lower;
@@ -78,6 +86,19 @@ int main(int argc, char **argv) {
             parse_numeric_option(config.continuation_indent_width)},
         {"-indent-width", "NUMBER", "Use NUMBER spaces for indentation.",
             parse_numeric_option(config.indent_width)},
+        {"-reflow-arguments", "ALGORITHM",
+            "Algorithm to reflow command arguments. Available: none, oneperline, binpack",
+            [&](const std::string &value) {
+                if (value == "none") {
+                    config.reflow_arguments = ReflowArguments::None;
+                } else if (value == "oneperline") {
+                    config.reflow_arguments = ReflowArguments::OnePerLine;
+                } else if (value == "binpack") {
+                    config.reflow_arguments = ReflowArguments::BinPack;
+                } else {
+                    throw opterror;
+                }
+            }},
         // {"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."},
         // {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."},
         // {"-argument-bin-pack=WIDTH", "\"Bin pack\" arguments, with a maximum column width of
@@ -94,9 +115,12 @@ int main(int argc, char **argv) {
     std::vector<TransformFunction> transform_functions;
     transform_functions.emplace_back(
         std::bind(transform_indent, _1, _2, repeat_string(" ", config.indent_width)));
-    if (config.column_limit > 0) {
+    if (config.reflow_arguments == ReflowArguments::BinPack) {
         transform_functions.emplace_back(std::bind(transform_argument_bin_pack, _1, _2,
             config.column_limit, repeat_string(" ", config.continuation_indent_width)));
+    } else if (config.reflow_arguments == ReflowArguments::OnePerLine) {
+        transform_functions.emplace_back(std::bind(transform_argument_per_line, _1, _2,
+            repeat_string(" ", config.continuation_indent_width)));
     }
     if (config.command_case == LetterCase::Lower) {
         transform_functions.emplace_back(&transform_lowercase_commands);
