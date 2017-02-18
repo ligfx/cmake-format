@@ -120,13 +120,14 @@ static inline void REQUIRE_PARSES(std::string original) {
     REQUIRE(roundtripped == original);
 }
 
+template <typename F, typename... Args>
 static inline void REQUIRE_TRANSFORMS_TO(
-    TransformFunction transform, std::string original, std::string wanted) {
+    std::string original, std::string wanted, F transform, Args... args) {
     std::vector<Span> spans;
     std::vector<Command> commands;
     std::tie(spans, commands) = parse(original);
 
-    transform(commands, spans);
+    transform(commands, spans, args...);
     std::string output;
     for (auto s : spans) {
         output += s.data;

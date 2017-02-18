@@ -76,7 +76,7 @@ void transform_indent(
 }
 
 TEST_CASE("Reindents toplevel") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(
         R"(
    improperly_indented_toplevel()
 correctly_indented_toplevel()
@@ -84,11 +84,12 @@ correctly_indented_toplevel()
         R"(
 improperly_indented_toplevel()
 correctly_indented_toplevel()
-)");
+)",
+        transform_indent, "INDENT ");
 }
 
 TEST_CASE("Reindents arguments") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(
         R"(
     command(
        ARGUMENT
@@ -110,11 +111,12 @@ INDENT command(
 INDENT ARGUMENT
 INDENT )
 endif()
-)");
+)",
+        transform_indent, "INDENT ");
 }
 
 TEST_CASE("Reindents comments") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(
         R"(
     # associated comment
     # with multiple lines
@@ -124,11 +126,12 @@ TEST_CASE("Reindents comments") {
 # associated comment
 # with multiple lines
 command()
-)");
+)",
+        transform_indent, "INDENT ");
 }
 
 TEST_CASE("Reindents blocks") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_indent, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(
         R"(
    if(CONDITION)
 command()
@@ -174,5 +177,6 @@ endmacro()
 while()
 INDENT command()
 endwhile()
-)");
+)",
+        transform_indent, "INDENT ");
 }

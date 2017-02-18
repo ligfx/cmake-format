@@ -94,7 +94,7 @@ void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Spa
 }
 
 TEST_CASE("Bin packs arguments") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_argument_bin_pack, _1, _2, 30, "    "),
+    REQUIRE_TRANSFORMS_TO(
         R"(
 command(ARG1 ARG2 ARG3 ARG4 ARG5 ARG6
     ARG7)
@@ -129,11 +129,12 @@ command(ARG1# comment
     ARG3 #a
     ARG4 ARG5 ARG6 ARG7 ARG8
     ARG9 ARG10)
-)");
+)",
+        transform_argument_bin_pack, 30, "    ");
 }
 
 TEST_CASE("Puts line break between line-comment and closing paren") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_argument_bin_pack, _1, _2, 30, "    "), R"(
+    REQUIRE_TRANSFORMS_TO(R"(
 command(
     #comment
 )
@@ -142,11 +143,12 @@ command(
 command(
     #comment
     )
-)");
+)",
+        transform_argument_bin_pack, 30, "    ");
 }
 
 TEST_CASE("Puts line break between arg-comment and closing paren") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_argument_bin_pack, _1, _2, 30, "    "),
+    REQUIRE_TRANSFORMS_TO(
         R"(
 command(ARG # comment
 )
@@ -154,5 +156,6 @@ command(ARG # comment
         R"(
 command(ARG # comment
     )
-)");
+)",
+        transform_argument_bin_pack, 30, "    ");
 }

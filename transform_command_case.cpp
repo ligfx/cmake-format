@@ -17,7 +17,7 @@ void transform_command_case(
 }
 
 TEST_CASE("Makes command invocations lowercase") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_command_case, _1, _2, LetterCase::Lower),
+    REQUIRE_TRANSFORMS_TO(
         R"(
 UPPERCASE_COMMAND()
 mIxEdCaSe_CoMmAnD()
@@ -25,11 +25,12 @@ mIxEdCaSe_CoMmAnD()
         R"(
 uppercase_command()
 mixedcase_command()
-)");
+)",
+        transform_command_case, LetterCase::Lower);
 }
 
 TEST_CASE("Makes command invocations uppercase") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_command_case, _1, _2, LetterCase::Upper),
+    REQUIRE_TRANSFORMS_TO(
         R"(
 lowercase_command()
 mIxEdCaSe_CoMmAnD()
@@ -37,5 +38,6 @@ mIxEdCaSe_CoMmAnD()
         R"(
 LOWERCASE_COMMAND()
 MIXEDCASE_COMMAND()
-)");
+)",
+        transform_command_case, LetterCase::Upper);
 }

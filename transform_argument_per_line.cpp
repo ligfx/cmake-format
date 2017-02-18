@@ -35,7 +35,7 @@ void transform_argument_per_line(std::vector<Command> &commands, std::vector<Spa
 }
 
 TEST_CASE("Puts each argument on its own line") {
-    REQUIRE_TRANSFORMS_TO(std::bind(transform_argument_per_line, _1, _2, "INDENT "),
+    REQUIRE_TRANSFORMS_TO(
         R"(
     command(ARG1 ARG2 ARG3)
     cmake_minimum_required(VERSION 3.0)
@@ -54,5 +54,6 @@ TEST_CASE("Puts each argument on its own line") {
     project(
     INDENT cmake-format
     )
-)");
+)",
+        transform_argument_per_line, "INDENT ");
 }
