@@ -16,6 +16,7 @@ options
   -command-case=CASE                 Letter case of command invocations. Available: lower, upper
   -continuation-indent-width=NUMBER  Indent width for line continuations.
   -indent-width=NUMBER               Use NUMBER spaces for indentation.
+  -max-empty-lines-to-keep=NUMBER    The maximum number of consecutive empty lines to keep.
   -reflow-arguments=ALGORITHM        Algorithm to reflow command arguments. Available: none, oneperline, binpack, heuristic
   -i                                 Re-format files in-place.
   -q                                 Quiet mode: suppress informational messages.

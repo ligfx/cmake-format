@@ -22,3 +22,5 @@ void transform_indent(
     std::vector<Command> &commands, std::vector<Span> &spans, const std::string &indent_string);
 void transform_indent_rparen(std::vector<Command> &commands, std::vector<Span> &spans,
     const std::string &rparen_indent_string);
+void transform_squash_empty_lines(
+    std::vector<Command> &commands, std::vector<Span> &spans, size_t max_empty_lines);

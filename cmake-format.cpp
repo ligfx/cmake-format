@@ -49,6 +49,7 @@ int main(int argc, char **argv) {
     LetterCase command_case{LetterCase::Lower};
     size_t continuation_indent_width{0};
     size_t indent_width{4};
+    size_t max_empty_lines_to_keep{1};
     ReflowArguments reflow_arguments{ReflowArguments::None};
 
     bool quiet = false;
@@ -82,6 +83,9 @@ int main(int argc, char **argv) {
             parse_numeric_option(continuation_indent_width)},
         {"-indent-width", "NUMBER", "Use NUMBER spaces for indentation.",
             parse_numeric_option(indent_width)},
+        {"-max-empty-lines-to-keep", "NUMBER",
+            "The maximum number of consecutive empty lines to keep.",
+            parse_numeric_option(max_empty_lines_to_keep)},
         {"-reflow-arguments", "ALGORITHM",
             "Algorithm to reflow command arguments. Available: none, oneperline, binpack, "
             "heuristic",
@@ -125,6 +129,8 @@ int main(int argc, char **argv) {
             column_limit, repeat_string(" ", continuation_indent_width)));
     }
     transform_functions.emplace_back(std::bind(transform_command_case, _1, _2, command_case));
+    transform_functions.emplace_back(
+        std::bind(transform_squash_empty_lines, _1, _2, max_empty_lines_to_keep));
 
     if (filenames.size() == 0) {
         if (format_in_place) {
