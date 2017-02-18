@@ -13,6 +13,7 @@
 #include <utility>
 #include <vector>
 
+#include "command_line.h"
 #include "helpers.h"
 #include "parser.h"
 #include "transform.h"
@@ -35,15 +36,6 @@ void parse_and_transform_and_write(
     }
 }
 
-static std::vector<std::pair<std::string, std::string>> command_line_descriptions = {
-    {"-command-case=lower|upper", "Letter case of command invocations."},
-    {"-indent-width=NUMBER", "Use NUMBER spaces for indentation."},
-    // {"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."},
-    // {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."},
-    // {"-argument-bin-pack=WIDTH", "\"Bin pack\" arguments, with a maximum column width of
-    // WIDTH."},
-};
-
 enum class LetterCase {
     Lower,
     Upper,
@@ -54,81 +46,46 @@ int main(int argc, char **argv) {
         LetterCase command_case{LetterCase::Lower};
         size_t indent_width{4};
     } config;
-
     bool format_in_place = false;
-    std::vector<TransformFunction> transform_functions;
 
-    std::vector<std::string> filenames;
-    for (int i = 1; i < argc; i++) {
-        const std::string arg{argv[i]};
-        if (arg[0] == '-') {
-            std::smatch reindent_match;
+    const static std::string description =
+        "Re-formats specified files. If no files are specified on the command-line,\n"
+        "reads from standard input. If -i is specified, formats files in-place;\n"
+        "otherwise, writes results to standard output.";
 
-            if ("-help" == arg || "-h" == arg || "--help" == arg) {
-                fprintf(stderr, R"(
-usage: %s [options] [file ...]
+    const static std::vector<SwitchOptionDescription> switch_options = {
+        {"-i", "Re-format files in-place.", format_in_place},
+    };
 
-Re-formats specified files. If no files are specified on the command-line,
-reads from standard input. If -i is specified, formats files in-place;
-otherwise, writes results to standard output.
-
-options:
-)",
-                    argv[0]);
-
-                size_t max_option_size = 0;
-                for (auto const &p : command_line_descriptions) {
-                    max_option_size = std::max(max_option_size, p.first.size());
-                }
-
-                for (auto const &p : command_line_descriptions) {
-                    std::string opt;
-                    std::string description;
-                    std::tie(opt, description) = p;
-                    fprintf(stderr, "  %s%s  %s\n", opt.c_str(),
-                        repeat_string(" ", max_option_size - opt.size()).c_str(),
-                        description.c_str());
-                }
-
-                fprintf(stderr, "  %s%s  %s\n", "-i",
-                    repeat_string(" ", max_option_size - 2).c_str(), "Re-format files in-place.");
-                exit(1);
-            } else if (arg == "-i") {
-                format_in_place = true;
-            } else {
-                if (arg == "-indent-width") {
-                    fprintf(
-                        stderr, "%s: for the -indent-width option: requires a value!\n", argv[0]);
-                    exit(1);
-                } else if (arg.find("-indent-width=") == 0) {
-                    config.indent_width =
-                        std::stoi(arg.substr(std::string{"-indent-width="}.size()));
-                } else if (arg == "-command-case") {
-                    fprintf(
-                        stderr, "%s: for the -command-case option: requires a value!\n", argv[0]);
-                    exit(1);
-                } else if (arg.find("-command-case=") == 0) {
-                    const auto command_case = arg.substr(std::string{"-command-case="}.size());
-                    if (command_case == "lower") {
-                        config.command_case = LetterCase::Lower;
-                    } else if (command_case == "upper") {
-                        config.command_case = LetterCase::Upper;
-                    } else {
-                        fprintf(stderr, "%s: for the -command-case option: '%s' value invalid!\n",
-                            argv[0], command_case.c_str());
-                        exit(1);
-                    }
+    const static std::vector<ArgumentOptionDescription> argument_options = {
+        {"-command-case", "\"lower\"|\"upper\"", "Letter case of command invocations.",
+            [&](const std::string &value) {
+                if (value == "lower") {
+                    config.command_case = LetterCase::Lower;
+                } else if (value == "upper") {
+                    config.command_case = LetterCase::Upper;
                 } else {
-                    fprintf(stderr, "%s: unrecognized option '%s'. Try: %s -help\n", argv[0],
-                        arg.c_str(), argv[0]);
-                    exit(1);
+                    throw opterror;
                 }
-            }
-        } else {
-            filenames.emplace_back(arg);
-        }
-    }
+            }},
+        {"-indent-width", "NUMBER", "Use NUMBER spaces for indentation.",
+            [&](const std::string &value) {
+                try {
+                    config.indent_width = std::stoi(value);
+                } catch (const std::invalid_argument &) {
+                    throw opterror;
+                }
+            }},
+        // {"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."},
+        // {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."},
+        // {"-argument-bin-pack=WIDTH", "\"Bin pack\" arguments, with a maximum column width of
+        // WIDTH."},
+    };
 
+    std::vector<std::string> filenames =
+        parse_command_line(argc, argv, description, switch_options, argument_options);
+
+    std::vector<TransformFunction> transform_functions;
     transform_functions.emplace_back(
         std::bind(transform_indent, _1, _2, repeat_string(" ", config.indent_width)));
     if (config.command_case == LetterCase::Lower) {
