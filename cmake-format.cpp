@@ -43,7 +43,9 @@ enum class LetterCase {
 
 int main(int argc, char **argv) {
     struct {
+        size_t column_limit{0};
         LetterCase command_case{LetterCase::Lower};
+        size_t continuation_indent_width{0};
         size_t indent_width{4};
     } config;
     bool format_in_place = false;
@@ -58,6 +60,8 @@ int main(int argc, char **argv) {
     };
 
     const static std::vector<ArgumentOptionDescription> argument_options = {
+        {"-column-limit", "NUMBER", "Reflow arguments with maximum column width of NUMBER",
+            parse_numeric_option(config.column_limit)},
         {"-command-case", "\"lower\"|\"upper\"", "Letter case of command invocations.",
             [&](const std::string &value) {
                 if (value == "lower") {
@@ -68,14 +72,10 @@ int main(int argc, char **argv) {
                     throw opterror;
                 }
             }},
+        {"-continuation-indent-width", "NUMBER", "Indent width for line continuations.",
+            parse_numeric_option(config.continuation_indent_width)},
         {"-indent-width", "NUMBER", "Use NUMBER spaces for indentation.",
-            [&](const std::string &value) {
-                try {
-                    config.indent_width = std::stoi(value);
-                } catch (const std::invalid_argument &) {
-                    throw opterror;
-                }
-            }},
+            parse_numeric_option(config.indent_width)},
         // {"-indent-rparen=STRING", "Use STRING for indenting hanging right-parens."},
         // {"-argument-per-line=STRING", "Put each argument on its own line, indented by STRING."},
         // {"-argument-bin-pack=WIDTH", "\"Bin pack\" arguments, with a maximum column width of
@@ -85,9 +85,17 @@ int main(int argc, char **argv) {
     std::vector<std::string> filenames =
         parse_command_line(argc, argv, description, switch_options, argument_options);
 
+    if (config.continuation_indent_width == 0) {
+        config.continuation_indent_width = config.indent_width;
+    }
+
     std::vector<TransformFunction> transform_functions;
     transform_functions.emplace_back(
         std::bind(transform_indent, _1, _2, repeat_string(" ", config.indent_width)));
+    if (config.column_limit > 0) {
+        transform_functions.emplace_back(std::bind(transform_argument_bin_pack, _1, _2,
+            config.column_limit, repeat_string(" ", config.continuation_indent_width)));
+    }
     if (config.command_case == LetterCase::Lower) {
         transform_functions.emplace_back(&transform_lowercase_commands);
     } else {

@@ -6,7 +6,7 @@
 #include "transform.h"
 
 void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Span> &spans,
-    size_t column_width, const std::string &argument_indent_string) {
+    size_t column_limit, const std::string &argument_indent_string) {
 
     for (auto c : commands) {
         const std::string ident = lowerstring(spans[c.identifier].data);
@@ -38,7 +38,7 @@ void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Spa
                         {SpanType::Space, command_indentation + argument_indent_string},
                     });
                 next_token++;
-                line_width = column_width;
+                line_width = column_limit;
             } else if (spans[next_token].type == SpanType::Quoted ||
                        spans[next_token].type == SpanType::Unquoted) {
 
@@ -61,7 +61,7 @@ void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Spa
                 if (!first_argument) {
                     argument_size += 1;
                 }
-                if (line_width + argument_size <= column_width) {
+                if (line_width + argument_size <= column_limit) {
                     if (!first_argument) {
                         insert_span_before(next_token, commands, spans, {SpanType::Space, " "});
                     }
@@ -76,7 +76,7 @@ void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Spa
                 }
 
                 if (add_line_break) {
-                    line_width = column_width;
+                    line_width = column_limit;
                 }
 
                 next_token += argument_spans_count;
@@ -85,7 +85,7 @@ void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Spa
             }
         }
 
-        if (line_width + 1 >= column_width) {
+        if (line_width + 1 >= column_limit) {
             insert_span_before(next_token, commands, spans,
                 {{SpanType::Newline, "\n"},
                     {SpanType::Space, command_indentation + argument_indent_string}});

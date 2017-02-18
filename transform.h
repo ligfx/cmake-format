@@ -10,7 +10,7 @@
 #include "parser.h"
 
 void transform_argument_bin_pack(std::vector<Command> &commands, std::vector<Span> &spans,
-    size_t column_width, const std::string &argument_indent_string);
+    size_t column_limit, const std::string &argument_indent_string);
 void transform_argument_per_line(std::vector<Command> &commands, std::vector<Span> &spans,
     const std::string &argument_indent_string);
 void transform_indent(

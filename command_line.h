@@ -25,6 +25,16 @@ struct opterror_t {
 };
 constexpr opterror_t opterror;
 
+static std::function<void(const std::string &)> parse_numeric_option(size_t &ref) {
+    return [&](const std::string &value) {
+        try {
+            ref = std::stoi(value);
+        } catch (const std::invalid_argument &) {
+            throw opterror;
+        }
+    };
+}
+
 static std::vector<std::string> parse_command_line(int argc, char **argv,
     const std::string &description, const std::vector<SwitchOptionDescription> &switch_options,
     const std::vector<ArgumentOptionDescription> &argument_options) {
