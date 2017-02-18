@@ -28,9 +28,8 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU")
 endif()
 
 include_directories(
-    3rdparty/doctest-1.1.3
-    3rdparty/catch-1.7.2
     3rdparty/cmake-3.7.2/Source
+    3rdparty/doctest-1.1.3
     3rdparty/akrzemi1-Optional-25713110f
 )
 
