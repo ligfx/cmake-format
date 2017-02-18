@@ -29,7 +29,7 @@ endif()
 
 include_directories(
     3rdparty/cmake-3.7.2/Source
-    3rdparty/doctest-1.1.3
+    3rdparty/doctest-1.1.4
     3rdparty/akrzemi1-Optional-25713110f
 )
 
