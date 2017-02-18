@@ -11,15 +11,14 @@ Re-formats specified files. If no files are specified on the command-line,
 reads from standard input. If -i is specified, formats files in-place;
 otherwise, writes results to standard output.
 
-options:
-  -argument-bin-pack=WIDTH       "Bin pack" arguments, with a maximum column width of WIDTH.
-  -argument-per-line=STRING      Put each argument on its own line, indented by STRING.
-  -indent=STRING                 Use STRING for indentation.
-  -indent-arguments=align-paren  Align arguments on continuing lines with the command's left parenthesis.
-  -indent-arguments=STRING       Use STRING for indenting arguments on continuing lines.
-  -indent-rparen=STRING          Use STRING for indenting hanging right-parens.
-  -lowercase-commands            Lowercase command names in command invocations.
-  -i                             Re-format files in-place.
+options
+  -column-limit=NUMBER               Set maximum column width to NUMBER. If ReflowArguments is None, this does nothing.
+  -command-case=CASE                 Letter case of command invocations. Available: lower, upper
+  -continuation-indent-width=NUMBER  Indent width for line continuations.
+  -indent-width=NUMBER               Use NUMBER spaces for indentation.
+  -reflow-arguments=ALGORITHM        Algorithm to reflow command arguments. Available: none, oneperline, binpack, heuristic
+  -i                                 Re-format files in-place.
+  -q                                 Quiet mode: suppress informational messages.
 ```
 
 TODO:
