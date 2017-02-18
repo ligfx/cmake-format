@@ -157,7 +157,7 @@ std::vector<Span> parse(const std::string &content) {
     return spans;
 }
 
-TEST_CASE("Parses CMake code", "[parsing]") {
+TEST_CASE("Parses CMake code") {
     REQUIRE_PARSES(R"(
 cmake_command_without_arguments()
 _underscore_cmake_command()
@@ -185,10 +185,10 @@ simple_cmake_command(
 )");
 }
 
-TEST_CASE("Doesn't hang on unbalanced parentheses", "[parsing]") {
+TEST_CASE("Doesn't hang on unbalanced parentheses") {
     REQUIRE_THROWS(parse(R"(command()"));
 }
 
-TEST_CASE("Parses bare parentheses in arguments", "[parsing]") {
+TEST_CASE("Parses bare parentheses in arguments") {
     REQUIRE_PARSES("simple_cmake_command(some (bare (parentheses)) here)");
 }
