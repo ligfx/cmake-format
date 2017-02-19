@@ -50,4 +50,4 @@ add_executable(cmake-format
 set_source_files_properties(generated/cmListFileLexer.c PROPERTIES COMPILE_FLAGS -w)
 target_compile_definitions(cmake-format PRIVATE $<$<CONFIG:Debug>:CMAKEFORMAT_BUILD_TESTS>)
 
-add_custom_target(check COMMAND $<TARGET_FILE:cmake-format> -self-test --force-colors)
+add_custom_target(check COMMAND cmake-format -self-test --force-colors)
